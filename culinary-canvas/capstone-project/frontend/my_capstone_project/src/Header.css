@@ -1,0 +1,12 @@
+.header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 50px;
+    background-color: #166088;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3a ease-in-out;
+}
+.header:hover{
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
