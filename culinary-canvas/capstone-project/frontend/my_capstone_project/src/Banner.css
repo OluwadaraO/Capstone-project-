@@ -1,0 +1,12 @@
+.search-bar{
+    width: 80%;
+    padding: 10px;
+    font-size: 17px;
+    margin-bottom: 20px;
+    border: 1px solid black;
+    margin-top: 20px;
+}
+.search-button{
+    display: flex;
+    flex-wrap: wrap;
+}
