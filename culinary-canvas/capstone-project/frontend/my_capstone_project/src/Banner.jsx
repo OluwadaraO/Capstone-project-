@@ -17,11 +17,11 @@ function Banner(){
                 <input type='text' placeholder='Search for...' className='search-bar' id='search-bar'/>
                 <button id='search-button' onClick={handleHomePageClick}>SEARCH</button>
             </div>
-            <div>
-                <button onClick={handleHomePageClick}>All</button>
-                <button onClick={handleHomePageClick}>Popularity</button>
-                <button onClick={handleHomePageClick}>Cuisines</button>
-                <button onClick={handleHomePageClick}>Calory</button>
+            <div className='category'>
+                <button onClick={handleHomePageClick} className='all'>All</button>
+                <button onClick={handleHomePageClick} className='popularity'>Popularity</button>
+                <button onClick={handleHomePageClick} className='cuisines'>Cuisines</button>
+                <button onClick={handleHomePageClick} className='calory'>Calory</button>
             </div>
         </div>
     )

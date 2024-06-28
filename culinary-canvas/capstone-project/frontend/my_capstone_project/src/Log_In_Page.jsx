@@ -37,7 +37,11 @@ function Log_In_Page(){
 
     return(
         <div className="logInPage">
-            <h1 className="culinary-canvas"><a  id="create-canvas" href="/create">Culinary Canvas</a></h1>
+            <div className="culinary-canvas">
+                <h1 className="title">
+                    Culinary Canvas
+                </h1>
+            </div>
             <div className="loginPage">
                 <div className="LoginFormContainer">
                     <h1 className="sign-in">Sign In</h1>

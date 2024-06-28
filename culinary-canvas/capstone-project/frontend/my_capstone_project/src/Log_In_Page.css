@@ -34,7 +34,7 @@ body, html {
     position: relative;
     z-index: 2;
     padding: 40px;
-    border-radius: 8px;
+    border-radius: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background: rgba(0, 0, 0, 0.6);
     text-align: center;
@@ -52,6 +52,7 @@ body, html {
     padding: 10px 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    opacity: 0.85;
 }
 .create-canvas:visited{
     color: white;
@@ -101,4 +102,7 @@ body, html {
 }
 .LoginForm .sign-up-link a:hover{
     text-decoration: underline;
+}
+.title{
+    color: white;
 }

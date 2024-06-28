@@ -129,33 +129,6 @@ app.post('/logout', (req, res)=> {
     res.status(200).json("Logged out successfully")
 })
 
-app.get('/recipes', async(req, res) => {
-    const query = req.query.q || 'chicken';
-    const url = `https://api.edamam.com/search?q=${query}&app_id=${process.env.EDAMAM_APP_ID}&app_key=${process.env.EDAMAM_APP_KEY}`;
-
-    try{
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Error fetching recipes: ${response.statusText}`);
-        }
-        const data = await response.json();
-        const recipes = data.hits.map(hit=> hit.recipe);
-
-        await prisma.recipe.createMany({
-            data: recipes.map(recipe => ({
-                title: recipe.label,
-                ingredients: recipe.ingredientLines.join(','),
-                url: recipe.url,
-                image: recipe.image
-            })),
-            skipDuplicates: true
-        })
-        res.json(recipes);
-    }catch(error){
-        res.status(500).send("Error fetching recipes");
-    }
-})
-
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
   })
