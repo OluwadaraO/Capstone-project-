@@ -1,0 +1,15 @@
+.profile-picture{
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+.profile-picture:hover{
+    transform: scale(1.1);
+}
+.user-information{
+    display: flex;
+    margin-bottom: 30px;
+    margin-top: 30px;
+}

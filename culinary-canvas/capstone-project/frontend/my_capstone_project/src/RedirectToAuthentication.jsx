@@ -3,54 +3,55 @@ import React, {createContext, useContext, useEffect, useState} from 'react'
 const RedirectToAuthentication = createContext()
 export const  AuthorizationContext = ({children})=>{
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [username, setUserName] = useState(null)
+    const [user, setUser] = useState(null)
 
     useEffect(() => {
         const checkAuthorization = async() => {
             try{
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_ADDRESS}/protected`, {
                     method: 'GET',
-                    credentials: 'include'
+                    credentials: 'include',
                 });
                 if(response.ok){
                     const data = await response.json();
-                    console.log(data)
-                    setUserName(data)
                     setIsAuthenticated(true);
-
+                    setUser(data);
                 }
                 else{
-                    setIsAuthenticated(false)
+                    setIsAuthenticated(false);
                 }
             }catch(error) {
-                console.error('Oops! Wrong Log in credentials')
-                setIsAuthenticated(false)
+                console.error('Oops! Wrong Log in credentials');
+                setIsAuthenticated(false);
             }
-        }; checkAuthorization();
-    }, [])
-    function login(userData){
-        setIsAuthenticated(true)
-        setUserName(userData)
-    }
+        };
+        checkAuthorization();
+    }, []);
+
+    const login=(userData)=>{
+        setIsAuthenticated(true);
+        setUser(userData);
+    };
+
     const  logOut = async()=>{
         try{
             await fetch('http://localhost:3000/logout', {
                 method: "POST",
-                credentials: 'include'
+                credentials: 'include',
             });
-            setIsAuthenticated(false)
-            setUserName(null)
+            setIsAuthenticated(false);
+            setUser(null);
         }catch(error){
-            console.error('Log out Failed')
+            console.error(error)
         }
-    }
+    };
 
     return(
-        <RedirectToAuthentication.Provider value={{isAuthenticated, username, logOut, login}}>
+        <RedirectToAuthentication.Provider value={{isAuthenticated, user, logOut, login}}>
             {children}
         </RedirectToAuthentication.Provider>
-    )
-}
+    );
+};
 export const useAuth = () => {
-    return useContext(RedirectToAuthentication)
-}
+    return useContext(RedirectToAuthentication);
+};

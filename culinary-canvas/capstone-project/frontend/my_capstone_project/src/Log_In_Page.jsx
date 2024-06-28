@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from './RedirectToAuthentication'
 import './Log_In_Page.css'
@@ -7,8 +7,7 @@ import Header from "./Header";
 function Log_In_Page(){
     const [userName, setUserName] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const { isAuthenticated,login} = useAuth();
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleUserLogin = async (e) => {
@@ -24,9 +23,8 @@ function Log_In_Page(){
 
             });
             if (response.ok){
-                const {token, user} = await response.json()
-                console.log("value", user)
-                login(user)
+                const user = await response.json()
+                login(user.userRecord)
                 navigate('/')
             } else{
                 alert('Wrong username or password. Please try again...')
@@ -36,9 +34,6 @@ function Log_In_Page(){
             alert('Oops! Something went wrong. Please try again.')
         }
     };
-    // useEffect(() => {
-    //     handleUserLogin(e)
-    // }, [])
 
     return(
         <div className="logInPage">
@@ -54,20 +49,21 @@ function Log_In_Page(){
                     id="userName"
                     placeholder="UserName"
                     value={userName}
-                    onChange={(e) => setUserName(e.target.value)} required/>
+                    onChange={(e) => setUserName(e.target.value)}
+                    autoComplete="given-name" required/>
 
                     <input
                     type="password"
                     id="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)} required/>
-                    {error && <p>{error}</p>}
+                    onChange={(e) => setPassword(e.target.value)} required
+                    />
                     <button type="submit" className="submitButton">Log In</button>
                 </form>
             </div>
         </div>
-    )
+    );
 
-}
-export default Log_In_Page
+};
+export default Log_In_Page;
