@@ -13,3 +13,17 @@
     margin-bottom: 30px;
     margin-top: 30px;
 }
+.recipes{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.recipe{
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 200px;
+}
+.recipe img{
+    width: 100%;
+    height: auto;
+}

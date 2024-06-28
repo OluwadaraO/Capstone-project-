@@ -24,10 +24,11 @@ model Users{
 
 model Recipe{
   id Int @id @default(autoincrement())
-  name String?
-  imageUrl String?
-  calories Int?
-  ingredients Int?
+  title String
+  ingredients String
+  url String
+  image String
+  calories Int
   likes Int @default(0)
   userID Int
   user Users @relation(fields: [userID], references: [id], onDelete: Cascade)
