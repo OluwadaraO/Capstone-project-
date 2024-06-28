@@ -14,7 +14,7 @@ function Banner(){
     return(
         <div>
             <div className='search'>
-                <input type='text' placeholder='Search for...' className='search-bar'/>
+                <input type='text' placeholder='Search for...' className='search-bar' id='search-bar'/>
                 <button id='search-button' onClick={handleHomePageClick}>SEARCH</button>
             </div>
             <div>

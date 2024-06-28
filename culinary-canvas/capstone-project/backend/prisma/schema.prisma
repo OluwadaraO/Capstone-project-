@@ -13,12 +13,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
+model Users{
   id Int @id @default(autoincrement())
   userName String @unique
-  name String?
-  password String?
+  name String
+  password String
   recipe Recipe[]
+  imageUrl String?
 }
 
 model Recipe{
@@ -29,5 +30,5 @@ model Recipe{
   ingredients Int?
   likes Int @default(0)
   userID Int
-  user User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  user Users @relation(fields: [userID], references: [id], onDelete: Cascade)
 }

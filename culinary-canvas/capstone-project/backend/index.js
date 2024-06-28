@@ -1,18 +1,20 @@
-require('dotenv').config()
+require('dotenv').config();
 
-const { PrismaClient } = require('@prisma/client')
-const prisma = new PrismaClient()
-const cors = require('cors')
-const express = require('express')
-const bcrypt = require('bcrypt');
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken')
-const secretKey = process.env.JWT_SECRET_TOKEN
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+
 const saltRounds = 14;
-const PORT = 3000
-const session = require('express-session')
-const pgSession = require('connect-pg-simple')(session);
+const secretKey = process.env.JWT_SECRET_TOKEN
 const app = express()
+const PORT = 3000
+PEXELS_API_KEY = process.env.API_KEY
+
 app.use(cookieParser())
 app.use(express.json())
 app.use(cors(
@@ -22,44 +24,67 @@ app.use(cors(
     }
 ))
 
-//to create a new user's account
+//to fetch a random image for users's profile
+const fetchRandomProfileImage = async () => {
+    try{
+        const response = await fetch(`https://api.pexels.com/v1/search?query=random&per_page=1&page=${Math.floor(Math.random() * 100) + 1}`, {
+            headers: {
+                Authorization: PEXELS_API_KEY,
+            },
+        });
+        const data = await response.json()
+        if (!response.ok){
+            throw new Error(`Error fetching data : ${data.error}`)
+        }
+        return data.photos[0].src.original;
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({error: 'Failed to get image'})
+    }
+}
+
+//to create a new users's account
 app.post('/create', async(req, res) => {
     const {userName, name, password} = req.body;
         try{
-            const existingUser = await prisma.user.findUnique({where: {userName}})
+            const existingUser = await prisma.users.findUnique({where: {userName}})
             if (existingUser){
-                return res.status(400).json("Oops! User already exists.")
+                return res.status(400).json({message: "Oops! users already exists."})
             }
             const hashed = await bcrypt.hash(password, saltRounds);
-            const newUserAccount = await prisma.user.create({
+            const imageUrl = await fetchRandomProfileImage();
+            const newUserAccount = await prisma.users.create({
                 data: {
                     userName,
                     name,
-                    password: hashed
+                    password: hashed,
+                    imageUrl: imageUrl
                 }
             });
             res.status(200).json(newUserAccount)
         }
         catch(error){
             console.error("Error posting data:", error);
-            res.status(500).json({error: 'Failed to create new user'})
+            res.status(500).json({error: 'Failed to create new users'})
         };
 })
 
-//to log in to a user's account
+//to log in to a users's account
 app.post('/login', async(req, res) => {
     const {userName, password} = req.body;
     try{
-        const userRecord = await prisma.user.findUnique({
-            where : {userName}
+        const userRecord = await prisma.users.findUnique({
+            where : {userName},
         })
         if (!userRecord){
-            return res.status(400).json("Username not found. Please try again")
+            return res.status(400).json({message: "Username not found. Please try again"})
         }
-        const matched = bcrypt.compare(password, userRecord.password)
+        const matched = await bcrypt.compare(password, userRecord.password)
         if (!matched){
-            return res.status(400).json("Wrong password and username please try again")
+            return res.status(400).json({message: "Wrong password and username please try again"})
         }
+        else{
         const token = jwt.sign({id: userRecord.id}, secretKey, {expiresIn: '1h'})
 
         res.cookie('token', token, {
@@ -68,9 +93,12 @@ app.post('/login', async(req, res) => {
             sameSite: 'strict',
             maxAge: 3600000,
         })
+
         res.status(200).json({token, userRecord})
+    }
     } catch(error){
-        res.status(500).json("Something went wrong...")
+        console.error(error)
+        res.status(500).json({message: "Something went wrong..."})
     }
 })
 
@@ -78,21 +106,21 @@ app.post('/login', async(req, res) => {
 app.get('/protected', async (req, res) => {
     const token = req.cookies.token;
     if (!token){
-        return res.status(200).json(" No token found, authorization denied")
+        return res.status(401).json(" No token found, authorization denied")
     }
     try{
         const decoded = jwt.verify(token, secretKey);
-        const user = await prisma.user.findUnique({where :{id : decoded.id}})
-       if(!user){
-        res.status(401).json("user not found")
+        const users = await prisma.users.findUnique({where :{id : decoded.id}})
+       if(!users){
+        res.status(401).json({message: "users not found"})
        }
-       res.status(200).json(user);
+       res.status(200).json(users);
     }catch(error){
         res.status(401).json("Oops! Token is not valid")
     }
 })
 
-
+//to log out
 app.post('/logout', (req, res)=> {
     res.clearCookie('token', {
         httpOnly: true,
