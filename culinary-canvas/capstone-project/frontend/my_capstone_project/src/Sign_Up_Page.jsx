@@ -32,32 +32,50 @@ function Sign_Up_Page() {
     }
     return(
         <div className='Sign-up'>
-            <h1> Welcome to Culinary Canvas</h1>
-            <div className='Authorization Links'>
-                <a href='/login'>Log In</a>
-                <a href='/create'> Sign Up</a>
+            <div className='header-values'>
+                <h1> Welcome to Culinary Canvas</h1>
+                <div className='Authorization Links'>
+                    <a href='/login'>Log In</a>
+                    <a href='/create'> Sign Up</a>
+                </div>
             </div>
+            <div className="SignupPage">
+                <div className='SignUpFormContainer'>
+                    <h1 className='create-new-account'>Sign Up</h1>
+                    <form onSubmit={handleUserSignUp}>
+                        <p className='create-name'>Please create a username and password</p>
+                        <div className='user-values'>
+                            <div className='username-with-input'>
+                                <label className='username'>Username </label>
+                                <input type='text'
+                                    className='user-name-answer'
+                                    placeholder='Create a new username... '
+                                    value={userName}
+                                    onChange={(e) => setUserName(e.target.value)} required/>
+                            </div>
+                            <div className='password-with-input'>
+                                <label className='password'>Password </label>
+                                <input type='text'
+                                placeholder='Input your password...'
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)} required/>
+                            </div>
+                            <div className='name-with-input'>
+                                <label className='name'> Name </label>
+                                <input
+                                type='text'
+                                placeholder='Your name...'
+                                value={name}
+                                onChange={(e) => setName(e.target.value)} required/>
+                            </div>
+                        </div>
+                        {error && <p>{error}</p>}
+                        <button type='submit' className='sign-up'>Sign Up</button>
+                    </form>
+                </div>
 
-            <form onSubmit={handleUserSignUp}>
-                <p>Please create a username and password...</p>
-                <label>Username: </label>
-                    <input type='text'
-                    placeholder='Create a new username... '
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}/>
-                <label>Password: </label>
-                <input type='text'
-                placeholder='Input your password...'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}/>
-                <label> Name: </label>
-                <input
-                type='text'
-                value={name}
-                onChange={(e) => setName(e.target.value)}/>
-                {error && <p>{error}</p>}
-                <button type='submit'>Sign Up</button>
-            </form>
+                </div>
+
 
         </div>
     )
