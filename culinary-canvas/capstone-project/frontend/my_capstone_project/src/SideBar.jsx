@@ -15,7 +15,6 @@ function SideBar(){
             </button>
             <div className="sidebar-content">
                 <ul>
-                    {/* <h3>Hi {user.name}</h3> */}
                     <button>Log Out</button>
                 </ul>
             </div>
