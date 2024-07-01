@@ -105,3 +105,37 @@
 .user-authentication{
     margin-left: 1650px;
 }
+.search-form{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.search-input{
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+}
+.search-button{
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #e50914;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+.search-button:hover{
+    background: #f40612;
+}
+ .search-results{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+.filter-options{
+    display: flex;
+    flex-direction: column;
+}
