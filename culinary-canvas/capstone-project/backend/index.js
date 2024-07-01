@@ -13,7 +13,8 @@ const secretKey = process.env.JWT_SECRET_TOKEN
 const app = express()
 const PORT = 3000
 PEXELS_API_KEY = process.env.API_KEY
-
+EDAMAM_APP_ID = process.env.EDAMAM_APP_ID
+EDAMAM_APP_KEY = process.env.EDAMAM_APP_KEY
 app.use(cookieParser())
 app.use(express.json())
 app.use(cors(
@@ -129,6 +130,47 @@ app.post('/logout', (req, res)=> {
     res.status(200).json("Logged out successfully")
 })
 
+//get user's account
+app.get('/login/:id', async(req, res) => {
+    const {id} = req.params
+    const user = await prisma.users.findUnique(
+        {
+            where: {id: parseInt(id)}
+        });
+        res.json(user)
+})
+
+//get recipes
+app.get('/recipes', async(req, res) => {
+    const category = req.query.category || '';
+    const health = req.query.health || '';
+    let url = `https://api.edamam.com/search?&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`;
+
+    if (category) {
+        url += `&q=${category}`
+    }
+    if (health){
+        url += `&health=${health}`
+    }
+
+    console.log(`Fetching recipes for category: ${category}`);
+    console.log(`Request URL: ${url}`)
+    try{
+        const response = await fetch(url);
+
+        const data = await response.json();
+        console.log(data)
+        if(response.ok){
+            return res.json(data.hits)
+        }
+        else{
+            console.error(`Error fetching recipes: `, error)
+            res.status(500).json(error)
+        }
+    }catch(error){
+        res.status(500).json(error)
+    }
+})
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
   })
