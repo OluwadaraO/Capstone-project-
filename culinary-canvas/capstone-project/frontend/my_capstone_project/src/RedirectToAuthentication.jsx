@@ -19,10 +19,12 @@ export const  AuthorizationContext = ({children})=>{
                 }
                 else{
                     setIsAuthenticated(false);
+                    setUser(null)
                 }
             }catch(error) {
                 console.error('Oops! Wrong Log in credentials');
                 setIsAuthenticated(false);
+                setUser(null)
             }
         };
         checkAuthorization();
