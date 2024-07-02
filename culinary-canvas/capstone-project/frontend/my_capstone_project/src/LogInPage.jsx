@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from './RedirectToAuthentication'
-import './Log_In_Page.css'
+import './LogInPage.css'
 import Header from "./Header";
 
 function Log_In_Page(){

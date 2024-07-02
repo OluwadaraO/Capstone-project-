@@ -153,8 +153,6 @@ app.get('/recipes', async(req, res) => {
         url += `&health=${health}`
     }
 
-    console.log(`Fetching recipes for category: ${category}`);
-    console.log(`Request URL: ${url}`)
     try{
         const response = await fetch(url);
 
@@ -171,6 +169,56 @@ app.get('/recipes', async(req, res) => {
         res.status(500).json(error)
     }
 })
+
+//save a recipe
+app.post('/recipes/saved', async(req, res) => {
+    const {userId, recipeId, recipeName, recipeImage} = req.body;
+    try{
+        const savedRecipe = await prisma.savedRecipe.create({
+            data:{
+                userId,
+                recipeId,
+                recipeName,
+                recipeImage
+            }});
+        res.json(savedRecipe)
+    }catch(error) {
+        console.error('Error liking Recipe', error)
+        res.status(500).json(error)
+    }
+})
+
+app.delete('/recipes/unsaved', async(req, res) => {
+    const {userId, recipeId} = req.body;
+    try{
+        const deletedRecipe = await prisma.savedRecipe.deleteMany({
+            where: {
+                userId,
+                recipeId
+            }
+        });
+        res.json(deletedRecipe)
+    }catch(error){
+        console.error('error unliking recipes', error)
+        res.status(500).json(error)
+    }
+});
+
+app.get('/recipes/save/:userId', async(req, res) => {
+    const {userId} = req.params;
+    try{
+        const savedRecipe = await prisma.savedRecipe.findMany({
+            where: {
+                userId: parseInt(userId)
+            }
+        });
+        res.json(savedRecipe)
+    }catch(error){
+        console.error('error fetching liked recipes', error)
+        res.status(500).json(error)
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
   })

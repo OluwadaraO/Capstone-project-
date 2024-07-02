@@ -18,18 +18,14 @@ model Users{
   userName String @unique
   name String
   password String
-  recipe Recipe[]
   imageUrl String?
+  savedRecipes SavedRecipe[]
 }
-
-model Recipe{
+model SavedRecipe{
   id Int @id @default(autoincrement())
-  title String
-  ingredients String
-  url String
-  image String
-  calories Int
-  likes Int @default(0)
-  userID Int
-  user Users @relation(fields: [userID], references: [id], onDelete: Cascade)
+  userId Int
+  recipeId String
+  recipeName String
+  recipeImage String
+  user Users @relation(fields: [userId], references:[id])
 }

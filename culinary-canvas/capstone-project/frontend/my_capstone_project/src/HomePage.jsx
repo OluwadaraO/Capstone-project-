@@ -24,6 +24,30 @@ function HomePage(){
     const [isSearching, setIsSearching] = useState(false)
     //state to manage category filter
     const [filters, setFilters] = useState([])
+    //state to manage savedRecipes
+    const [savedRecipes, setSavedRecipes] = useState([])
+
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            const fetchSavedRecipes = async() => {
+                try{
+                    const response = await fetch(`http://localhost:3000/recipes/save/${user.id}`);
+
+                    const data = await response.json();
+                    if (Array.isArray(data)){
+                        setSavedRecipes(data)
+                    }
+                    else{
+                        setSavedRecipes([])
+                    }
+                }catch(error){
+                    console.error(error)
+                    setSavedRecipes([])
+                }
+            };
+        fetchSavedRecipes()
+        }
+    }, [isAuthenticated, user])
 
     //function to log out
     const LogOut = async() =>{
@@ -32,7 +56,7 @@ function HomePage(){
             alert('Logged Out Successfully');
             navigate('/');
         } catch(error){
-            console.log(error)
+            console.error(error)
         }
     }
 
@@ -57,7 +81,6 @@ function HomePage(){
         try{
             const response = await fetch(url);
             const data = await response.json();
-            //return the recipies
             return data;
         }catch(error){
             console.error('Error fetching recipies: ', error);
@@ -114,10 +137,40 @@ function HomePage(){
         setFilters((prevFilters) => prevFilters.includes(filter) ? prevFilters.filter((f) => f !== filter) : [...prevFilters, filter])
     }
 
+    const handleLike = async(recipe) => {
+        if (savedRecipes.some(saved => saved.recipeId === recipe.recipe.uri)){
+            await fetch(`http://localhost:3000/recipes/unsaved`, {
+                method: 'DELETE',
+                headers: {'Content-Type' : 'application/json'},
+                body: JSON.stringify({
+                    userId: user.id,
+                    recipeId: recipe.recipe.uri
+                })
+            });
+            setSavedRecipes(savedRecipes.filter(saved => saved.recipeId !== recipe.recipe.uri))
+        }else{
+            const response = await fetch(`http://localhost:3000/recipes/saved`, {
+                method: 'POST',
+                headers: {'Content-Type' : 'application/json'},
+                body: JSON.stringify({
+                    userId: user.id,
+                    recipeId: recipe.recipe.uri,
+                    recipeName: recipe.recipe.label,
+                    recipeImage: recipe.recipe.image
+                })
+            });
+            const savedRecipe = await response.json();
+            setSavedRecipes([...savedRecipes, savedRecipe])
+        }
+    }
+
+    const isRecipeSaved = (recipeId) => {
+        return savedRecipes.some(saved => saved.recipeId === recipeId)
+    }
+
     return (
         <>
             <Header/>
-            <SideBar/>
             {isAuthenticated && user ?(
                 <div>
                     <div className='user-information'>
@@ -129,8 +182,8 @@ function HomePage(){
                     </div>
                 </div>
             ) :(<div className='user-authentication'>
-                    <button className='user-log-in'><Link to={"/login"}>Log In</Link></button>
-                    <button className='user-sign-up'><Link to={"/create"}>Sign Up</Link></button>
+                    <button className='user-log-in'><Link to="/login">Log In</Link></button>
+                    <button className='user-sign-up'><Link to="/create">Sign Up</Link></button>
                 </div>
             )}
             <div className='search-form'>
@@ -195,6 +248,9 @@ function HomePage(){
                             <img src={result.recipe.image} alt={result.recipe.label}/>
                             <h3>{result.recipe.label}</h3>
                             <p>Calories: {Math.round(result.recipe.calories)}</p>
+                            <button onClick={(e) => {e.stopPropagation(); handleLike(result);}}>
+                                {isRecipeSaved(result.recipe.uri) ? 'Added to Saved' : 'Add to Saved'}
+                            </button>
                             <a href={result.recipe.url} target='_blank' rel='noopener noreferrer'>View Recipe</a>
                         </div>
                     ))}
@@ -212,6 +268,9 @@ function HomePage(){
                                         <img src={recipeData.recipe.image} alt={recipeData.recipe.label} onClick={handleHomePageClick}/>
                                         <h3 onClick={handleHomePageClick}>{recipeData.recipe.label} </h3>
                                         <p onClick={handleHomePageClick}>Calories: {Math.round(recipeData.recipe.calories)}</p>
+                                        <button onClick={(e) => {e.stopPropagation(); handleLike(recipeData);}}>
+                                            {isRecipeSaved(recipeData.recipe.uri) ? 'Added to Saved' : 'Add to Saved'}
+                                        </button>
                                         <a href={recipeData.recipe.url} target='_blank' rel='noopener noreferrer' onClick={handleHomePageClick}>View Recipe</a>
                                     </div>
                                 ))}

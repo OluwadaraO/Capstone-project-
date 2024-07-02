@@ -139,3 +139,20 @@
     display: flex;
     flex-direction: column;
 }
+.recipe-card button{
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border: 5px;
+    cursor: pointer;
+}
+.recipe-card button:hover{
+    background-color: #45A049;
+}
+.recipe-card button.unlike{
+    background-color: #f44336;
+}
+.recipe-card button.unlike:hover{
+    background-color: #e53935;
+}

@@ -1,0 +1,21 @@
+.dashboard{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+.profile-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.profile-picture{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+.liked-recipes-section{
+    width: 100%;
+    margin-bottom: 20px;
+}
