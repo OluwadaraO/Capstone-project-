@@ -13,8 +13,8 @@ const secretKey = process.env.JWT_SECRET_TOKEN
 const app = express()
 const PORT = 3000
 PEXELS_API_KEY = process.env.API_KEY
-EDAMAM_APP_ID = process.env.EDAMAM_APP_ID
-EDAMAM_APP_KEY = process.env.EDAMAM_APP_KEY
+EDAMAM_APP_ID = process.env.EDAMAM_API_ID_2
+EDAMAM_APP_KEY = process.env.EDAMAM_API_KEY_2
 app.use(cookieParser())
 app.use(express.json())
 app.use(cors(
@@ -26,102 +26,101 @@ app.use(cors(
 
 //to fetch a random image for users's profile
 const fetchRandomProfileImage = async () => {
-    try{
+    try {
         const response = await fetch(`https://api.pexels.com/v1/search?query=random&per_page=1&page=${Math.floor(Math.random() * 100) + 1}`, {
             headers: {
                 Authorization: PEXELS_API_KEY,
             },
         });
         const data = await response.json()
-        if (!response.ok){
+        if (!response.ok) {
             throw new Error(`Error fetching data : ${data.error}`)
         }
         return data.photos[0].src.original;
     }
-    catch(error){
+    catch (error) {
         console.error(error);
-        res.status(500).json({error: 'Failed to get image'})
+        res.status(500).json({ error: 'Failed to get image' })
     }
 }
 
 //to create a new users's account
-app.post('/create', async(req, res) => {
-    const {userName, name, password} = req.body;
-        try{
-            const existingUser = await prisma.users.findUnique({where: {userName}})
-            if (existingUser){
-                return res.status(400).json({message: "Oops! users already exists."})
-            }
-            const hashed = await bcrypt.hash(password, saltRounds);
-            const imageUrl = await fetchRandomProfileImage();
-            const newUserAccount = await prisma.users.create({
-                data: {
-                    userName,
-                    name,
-                    password: hashed,
-                    imageUrl: imageUrl
-                }
-            });
-            res.status(200).json(newUserAccount)
+app.post('/create', async (req, res) => {
+    const { userName, name, password } = req.body;
+    try {
+        const existingUser = await prisma.users.findUnique({ where: { userName } })
+        if (existingUser) {
+            return res.status(400).json({ message: "Oops! users already exists." })
         }
-        catch(error){
-            console.error("Error posting data:", error);
-            res.status(500).json({error: 'Failed to create new users'})
-        };
+        const hashed = await bcrypt.hash(password, saltRounds);
+        const imageUrl = await fetchRandomProfileImage();
+        const newUserAccount = await prisma.users.create({
+            data: {
+                userName,
+                name,
+                password: hashed,
+                imageUrl: imageUrl
+            }
+        });
+        res.status(200).json(newUserAccount)
+    }
+    catch (error) {
+        console.error("Error posting data:", error);
+        res.status(500).json({ error: 'Failed to create new users' })
+    };
 })
 
 //to log in to a users's account
-app.post('/login', async(req, res) => {
-    const {userName, password} = req.body;
-    try{
+app.post('/login', async (req, res) => {
+    const { userName, password } = req.body;
+    try {
         const userRecord = await prisma.users.findUnique({
-            where : {userName},
+            where: { userName },
         })
-        if (!userRecord){
-            return res.status(400).json({message: "Username not found. Please try again"})
+        if (!userRecord) {
+            return res.status(400).json({ message: "Username not found. Please try again" })
         }
         const matched = await bcrypt.compare(password, userRecord.password)
-        if (!matched){
-            return res.status(400).json({message: "Wrong password and username please try again"})
+        if (!matched) {
+            return res.status(400).json({ message: "Wrong password and username please try again" })
         }
-        else{
-        const token = jwt.sign({id: userRecord.id}, secretKey, {expiresIn: '1h'})
+        else {
+            const token = jwt.sign({ id: userRecord.id }, secretKey, { expiresIn: '1h' })
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 3600000,
+            })
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 3600000,
-        })
-
-        res.status(200).json({token, userRecord})
-    }
-    } catch(error){
+            res.status(200).json({ token, userRecord })
+        }
+    } catch (error) {
         console.error(error)
-        res.status(500).json({message: "Something went wrong..."})
+        res.status(500).json({ message: "Something went wrong..." })
     }
 })
 
 
 app.get('/protected', async (req, res) => {
     const token = req.cookies.token;
-    if (!token){
+    if (!token) {
         return res.status(401).json(" No token found, authorization denied")
     }
-    try{
+    try {
         const decoded = jwt.verify(token, secretKey);
-        const users = await prisma.users.findUnique({where :{id : decoded.id}})
-       if(!users){
-        res.status(401).json({message: "users not found"})
-       }
-       res.status(200).json(users);
-    }catch(error){
+        const users = await prisma.users.findUnique({ where: { id: decoded.id } })
+        if (!users) {
+            res.status(401).json({ message: "users not found" })
+        }
+        res.status(200).json(users);
+    } catch (error) {
         res.status(401).json("Oops! Token is not valid")
     }
 })
 
 //to log out
-app.post('/logout', (req, res)=> {
+app.post('/logout', (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -131,17 +130,17 @@ app.post('/logout', (req, res)=> {
 })
 
 //get user's account
-app.get('/login/:id', async(req, res) => {
-    const {id} = req.params
+app.get('/login/:id', async (req, res) => {
+    const { id } = req.params
     const user = await prisma.users.findUnique(
         {
-            where: {id: parseInt(id)}
+            where: { id: parseInt(id) }
         });
-        res.json(user)
+    res.json(user)
 })
 
-//get recipes
-app.get('/recipes', async(req, res) => {
+//get recipes and the likes in the recipe
+app.get('/recipes', async (req, res) => {
     const category = req.query.category || '';
     const health = req.query.health || '';
     let url = `https://api.edamam.com/search?&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`;
@@ -149,48 +148,115 @@ app.get('/recipes', async(req, res) => {
     if (category) {
         url += `&q=${category}`
     }
-    if (health){
+    if (health) {
         url += `&health=${health}`
     }
 
-    try{
+    try {
         const response = await fetch(url);
-
         const data = await response.json();
-        console.log(data)
-        if(response.ok){
-            return res.json(data.hits)
-        }
-        else{
-            console.error(`Error fetching recipes: `, error)
-            res.status(500).json(error)
-        }
-    }catch(error){
+        const recipeIds = await data.hits.map(hit => hit.recipe.uri);
+        const likes = await prisma.likedRecipe.groupBy({
+            by: ['recipeId'],
+            _count: {
+                recipeId: true,
+            },
+            where: {
+                recipeId: {
+                    in: recipeIds,
+                },
+            },
+        });
+        const likesMap = likes.reduce((acc, like) => {
+            acc[like.recipeId] = like._count.recipeId;
+            return acc;
+        }, {})
+        data.hits.forEach(hit => {
+            hit.likes = likesMap[hit.recipe.uri] || 0;
+        });
+
+        return res.json(data.hits)
+    }
+    catch (error) {
         res.status(500).json(error)
     }
 })
 
-//save a recipe
-app.post('/recipes/saved', async(req, res) => {
-    const {userId, recipeId, recipeName, recipeImage} = req.body;
-    try{
-        const savedRecipe = await prisma.savedRecipe.create({
-            data:{
+//to like a recipe
+app.post('/recipes/like', async (req, res) => {
+    const { userId, recipeId, recipeName, recipeImage } = req.body;
+    try {
+        const likedRecipe = await prisma.likedRecipe.create({
+            data: {
                 userId,
                 recipeId,
                 recipeName,
                 recipeImage
-            }});
+            }
+        });
+        res.json(likedRecipe)
+    }
+    catch (error) {
+        res.status(500).json(error)
+    }
+})
+
+//to unlike a recipe
+app.delete('/recipes/unlike', async (req, res) => {
+    const { userId, recipeId } = req.body;
+    try {
+        const deletedRecipe = await prisma.likedRecipe.deleteMany({
+            where: {
+                userId,
+                recipeId
+            },
+        });
+        res.json(deletedRecipe)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+})
+
+//to get all the recipes a user has liked
+app.get('/recipes/liked/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const likedRecipes = await prisma.likedRecipe.findMany({
+            where: {
+                userId: parseInt(userId)
+            }
+        });
+        res.json(likedRecipes)
+    } catch (error) {
+        console.error('error fetching liked recipes', error)
+        res.status(500).json(error)
+    }
+})
+
+
+//save a recipe
+app.post('/recipes/saved', async (req, res) => {
+    const { userId, recipeId, recipeName, recipeImage } = req.body;
+    try {
+        const savedRecipe = await prisma.savedRecipe.create({
+            data: {
+                userId,
+                recipeId,
+                recipeName,
+                recipeImage
+            }
+        });
         res.json(savedRecipe)
-    }catch(error) {
+    } catch (error) {
         console.error('Error liking Recipe', error)
         res.status(500).json(error)
     }
 })
 
-app.delete('/recipes/unsaved', async(req, res) => {
-    const {userId, recipeId} = req.body;
-    try{
+//to remove a recipe from saved
+app.delete('/recipes/unsaved', async (req, res) => {
+    const { userId, recipeId } = req.body;
+    try {
         const deletedRecipe = await prisma.savedRecipe.deleteMany({
             where: {
                 userId,
@@ -198,27 +264,116 @@ app.delete('/recipes/unsaved', async(req, res) => {
             }
         });
         res.json(deletedRecipe)
-    }catch(error){
+    } catch (error) {
         console.error('error unliking recipes', error)
         res.status(500).json(error)
     }
 });
 
-app.get('/recipes/save/:userId', async(req, res) => {
-    const {userId} = req.params;
-    try{
+//to get the all the recipes a user has saved
+app.get('/recipes/save/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
         const savedRecipe = await prisma.savedRecipe.findMany({
             where: {
                 userId: parseInt(userId)
             }
         });
         res.json(savedRecipe)
-    }catch(error){
+    } catch (error) {
         console.error('error fetching liked recipes', error)
         res.status(500).json(error)
     }
 })
 
+//to add a grocery item to a user's dashboard
+app.post('/grocery', async (req, res) => {
+    const { userId, itemName, quantity } = req.body;
+    try {
+        const newItem = await prisma.groceryList.create({
+            data: {
+                userId,
+                itemName,
+                quantity
+            }
+        });
+        res.json(newItem)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to add grocery item' })
+    }
+})
+
+//to get all the items in a user's dashboard
+app.get('/grocery/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const items = await prisma.groceryList.findMany({
+            where: {
+                userId: parseInt(userId),
+            }
+        });
+        res.json(items)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch grocery items' })
+    }
+})
+
+//to update a particular grocery item
+app.put('/grocery/:id', async (req, res) => {
+    const { id } = req.params;
+    const { itemName, quantity } = req.body;
+    try {
+        const updatedItem = await prisma.groceryList.update({
+            where: { id: parseInt(id) },
+            data: {
+                itemName,
+                quantity,
+            },
+        });
+        res.json(updatedItem)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Failed to update grocery List` })
+    }
+})
+
+// to delete a particular grocery item
+app.delete('/grocery/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deletedItem = await prisma.groceryList.delete({
+            where: { id: parseInt(id) },
+        });
+        res.json(deletedItem)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Failed to delete grocery item` })
+    }
+})
+
+app.post('/recommendations', async (req, res) => {
+    const { ingredients } = req.body;
+    try {
+        const searchQueries = ingredients.join(', ');
+        let url = `https://api.edamam.com/search?&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}&q=${searchQueries}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        const recipes = data.hits.map(hit => ({
+            id: hit.recipe.uri,
+            label: hit.recipe.label,
+            image: hit.recipe.image,
+            source: hit.recipe.source,
+            url: hit.recipe.url,
+        }));
+        res.json(recipes)
+    } catch (error) {
+        console.error('Error fetching recommendations: ', error);
+        res.status(500).json({ error: 'Failed to fetch recommendations' })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
-  })
+})
