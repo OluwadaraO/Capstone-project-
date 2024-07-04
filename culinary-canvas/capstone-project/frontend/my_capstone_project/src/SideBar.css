@@ -1,4 +1,4 @@
-.sidebar{
+.sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -11,9 +11,11 @@
     z-index: 1000;
     padding-top: 60px;
 }
+
 .sidebar.open {
     transform: translateX(0);
 }
+
 .sidebar-toggle {
     position: absolute;
     top: 20px;
@@ -25,11 +27,12 @@
     cursor: pointer;
     z-index: 1001;
 }
-.sidebar-content{
+
+.sidebar-content {
     padding: 20px;
 }
+
 .sidebar-content ul {
     list-style-type: none;
     padding: 0;
 }
-

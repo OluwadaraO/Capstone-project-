@@ -1,21 +1,52 @@
-.dashboard{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.dashboard-container {
+    display: grid;
+    grid-template-areas:
+        "profile profile profile"
+        "saved-recipes dietary-restrictions grocery-list"
+        "recommended-recipes recommended-recipes recommended-recipes";
+    grid-gap: 20px;
     padding: 20px;
 }
-.profile-section{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
+
+.profile-section {
+    grid-area: profile;
+    text-align: center;
 }
-.profile-picture{
+
+.profile-picture {
     width: 100px;
     height: 100px;
     border-radius: 50%;
+    margin-bottom: 10px;
 }
-.liked-recipes-section{
-    width: 100%;
-    margin-bottom: 20px;
+
+.saved-recipes {
+    grid-area: saved-recipes;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 500px;
+
+}
+
+.grocery-list {
+    grid-area: grocery-list;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.dietary-restrictions {
+    grid-area: dietary-restrictions;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.recommended-recipes {
+    grid-area: recommended-recipes;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
 }

@@ -20,12 +20,32 @@ model Users{
   password String
   imageUrl String?
   savedRecipes SavedRecipe[]
+  likedRecipes LikedRecipe[]
+  groceryLists GroceryList[]
 }
+
 model SavedRecipe{
   id Int @id @default(autoincrement())
   userId Int
   recipeId String
   recipeName String
   recipeImage String
+  user Users @relation(fields: [userId], references:[id])
+}
+
+model LikedRecipe{
+  id Int @id @default(autoincrement())
+  userId Int
+  recipeId String
+  recipeName String
+  recipeImage String
+  user Users @relation(fields: [userId], references:[id])
+}
+
+model GroceryList{
+  id Int @id @default(autoincrement())
+  userId Int
+  itemName String
+  quantity Int
   user Users @relation(fields: [userId], references:[id])
 }

@@ -1,15 +1,16 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
     height: 100%;
     font-family: 'Arial', sans-serif;
 }
 
-.SignupPage{
+.SignupPage {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,7 +20,7 @@ body, html {
     position: relative;
 }
 
-.SignupPage input{
+.SignupPage input {
     width: 100%;
     padding: 20px;
     margin: 10px 0;
@@ -27,8 +28,10 @@ body, html {
     border: 1px solid #ccc;
     border-radius: 4px;
     background: rgba(51, 51, 51, 0.5);
+    color: white;
 }
-.SignupPage::before{
+
+.SignupPage::before {
     content: '';
     position: absolute;
     top: 0;
@@ -39,7 +42,7 @@ body, html {
     z-index: 1;
 }
 
-.SignUpFormContainer{
+.SignUpFormContainer {
     position: relative;
     z-index: 2;
     padding: 40px;
@@ -49,27 +52,30 @@ body, html {
     text-align: center;
 }
 
-.create-new-account{
+.create-new-account {
     color: white;
     font-size: 45px;
 }
 
-.create-name{
+.create-name {
     color: white;
     font-size: 25px;
 }
-.username .password{
+
+.username .password {
     color: white;
     font-size: 20px;
 }
-.username-with-input .password-with-input .name-with-input{
+
+.username-with-input .password-with-input .name-with-input {
     display: flex;
     flex-direction: row;
     align-items: center;
     margin-top: 20px;
     font-size: 20px;
 }
-.sign-up{
+
+.sign-up {
     width: 100%;
     padding: 10px;
     background: rgba(229, 9, 20, 0.9);
@@ -80,11 +86,13 @@ body, html {
     cursor: pointer;
     transition: background 0.3s ease;
 }
-.sign-up:hover{
+
+.sign-up:hover {
     background: #ff4500;
     cursor: pointer;
 }
-.header-values{
+
+.header-values {
     position: fixed;
     top: 0;
     width: 100%;
@@ -99,7 +107,11 @@ body, html {
     opacity: 0.85;
 }
 
-.header-values a{
+.header-values a {
     color: red;
     border: 5px solid black;
+}
+
+.user-values {
+    color: white;
 }

@@ -1,92 +1,62 @@
-import './UserProfile.css';
-import {  Link } from 'react-router-dom';
-import React ,{ useState, useEffect } from 'react';
-import { useAuth } from './RedirectToAuthentication'
+import "./UserProfile.css";
+import { Link } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./RedirectToAuthentication";
+import GroceryList from "./GroceryList";
+import SavedRecipes from "./SavedRecipes";
 
-function UserProfile(){
-    const { user, logOut} = useAuth();
-    const [savedRecipe, setSavedRecipe] = useState([])
-
-
-    const fetchSavedRecipes = async() => {
-        const response = await fetch(`http://localhost:3000/recipes/save/${user.id}`)
-        const data = await response.json();
-        setSavedRecipe(data);
-    };
-
-    useEffect(() => {
-        if(user){
-            fetchSavedRecipes()
-        }
-    }, [user])
-    const handleLike = async(recipe) => {
-        if (savedRecipe.some(saved => saved.recipeId === recipe.recipe.uri)){
-            await fetch('http://localhost:3000/recipes/unsaved', {
-                method: 'DELETE',
-                headers: {'Content-Type' : 'application/json'},
-                body: JSON.stringify({
-                    userId: user.id,
-                    recipeId: recipe.recipe.uri,
-                })
-            });
-            setSavedRecipe(savedRecipe.filter(saved => saved.recipeId !== recipe.recipe.uri))
-
-        }else{
-            const response = await fetch(`http://localhost:3000/recipes/saved`, {
-                method: 'POST',
-                headers: {'Content-Type' : 'application/json'},
-                credentials: 'include',
-                body: JSON.stringify({
-                    userId: user.id,
-                    recipeId: recipe.recipe.uri,
-                    recipeName: recipe.recipe.label,
-                    recipeImage: recipe.recipe.image
-                })
-            });
-            const savedRecipe = await response.json()
-            setSavedRecipe([...savedRecipe, savedRecipe])
-        }
-    };
-
-    const handleLogOut =  async() => {
-        try{
-            await logOut();
-            alert('Logged out Successfully');
-        }catch(error){
-            console.error(error)
-        }
+function UserProfile() {
+  const { user, logOut } = useAuth();
+  const navigate = useNavigate();
+  const handleLogOut = async () => {
+    try {
+      await logOut();
+      alert("Logged out Successfully");
+    } catch (error) {
+      console.error(error);
     }
+  };
+  if (!user) {
+    return <Link to="/login">Please log back in</Link>;
+  }
 
-    if(!user){
-        return (
-            <Link to="/login">Please log back in</Link>
-        )
-    }
+  const handleFindRecipe = () => {
+    navigate("/find-recipes");
+  };
 
-    return(
-        <div className='dashboard'>
-            <div className='profile-section'>
-                <img src={user.imageUrl} alt={`${user.name}'s profile`} className='profile-picture'/>
-                <h1>Welcome back {user.name}</h1>
-            </div>
-            <div className='saved-recipes-section'>
-                <h3>Saved Recipes</h3>
-                <div className='recipes-grid'>
-                    {savedRecipe.length === 0 ? (
-                        <p>No saved recipes found</p>
-                    ) : (
-                        savedRecipe.map(recipe => (
-                            <div key={recipe.recipeId} className='recipe-card'>
-                                <img src={recipe.recipeImage} alt={recipe.recipeName} />
-                                <h4>{recipe.recipeName}</h4>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-            <Link to="/"><button>Back to Home Page</button></Link>
-            <button onClick={handleLogOut}>Log Out</button>
-        </div>
-    )
+  return (
+    <div className="dashboard-container">
+      <div className="profile-section">
+        <img
+          src={user.imageUrl}
+          alt={`${user.name}'s profile`}
+          className="profile-picture"
+        />
+        <h1>Welcome back {user.name}</h1>
+        <button onClick={handleFindRecipe}>
+          Find Recipes with Ingredients
+        </button>
+        <Link to="/">
+          <button>Back to Home Page</button>
+        </Link>
+        <button onClick={handleLogOut}>Log Out</button>
+      </div>
+      <div className="saved-recipes">
+        <h2>Saved Recipes</h2>
+        <SavedRecipes />
+      </div>
+      <div className="grocery-list">
+        <h2>Grocery List</h2>
+        <GroceryList />
+      </div>
+      <div className="dietary-restrictions">
+        <h2>Dietary Restrictions</h2>
+      </div>
+      <div className="recommended-recipes">
+        <h2>Recommended Recipes</h2>
+      </div>
+    </div>
+  );
 }
 export default UserProfile;

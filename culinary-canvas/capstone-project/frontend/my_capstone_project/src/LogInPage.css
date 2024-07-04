@@ -1,15 +1,16 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
     height: 100%;
     font-family: 'Arial', sans-serif;
 }
 
-.loginPage{
+.loginPage {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,7 +20,7 @@ body, html {
     position: relative;
 }
 
-.loginPage::before{
+.loginPage::before {
     content: '';
     position: absolute;
     top: 0;
@@ -30,7 +31,7 @@ body, html {
     z-index: 1;
 }
 
-.LoginFormContainer{
+.LoginFormContainer {
     position: relative;
     z-index: 2;
     padding: 40px;
@@ -40,7 +41,7 @@ body, html {
     text-align: center;
 }
 
-.culinary-canvas{
+.culinary-canvas {
     position: fixed;
     top: 0;
     width: 100%;
@@ -54,14 +55,16 @@ body, html {
     z-index: 1000;
     opacity: 0.85;
 }
-.create-canvas:visited{
+
+.create-canvas:visited {
     color: white;
 }
-.LoginForm h1{
+
+.LoginForm h1 {
     margin-bottom: 20px;
 }
 
-.LoginForm input{
+.LoginForm input {
     width: 100%;
     padding: 20px;
     margin: 10px 0;
@@ -72,7 +75,7 @@ body, html {
     color: white;
 }
 
-.LoginForm .submitButton{
+.LoginForm .submitButton {
     width: 100%;
     padding: 10px;
     background: rgba(229, 9, 20, 0.9);
@@ -83,27 +86,34 @@ body, html {
     cursor: pointer;
     transition: background 0.3s ease;
 }
-.LoginForm .submitButton:hover{
+
+.LoginForm .submitButton:hover {
     background: #ff4500;
 }
-.LoginForm .error{
+
+.LoginForm .error {
     color: red;
     margin: 10px 0;
 }
-.sign-in{
+
+.sign-in {
     color: white;
 }
-.LoginForm .sign-up-link{
+
+.LoginForm .sign-up-link {
     margin-top: 20px;
     color: white;
 }
+
 .LoginForm .sign-up-link a {
     color: #ff7f50;
     text-decoration: none;
 }
-.LoginForm .sign-up-link a:hover{
+
+.LoginForm .sign-up-link a:hover {
     text-decoration: underline;
 }
-.title{
+
+.title {
     color: white;
 }
