@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./RedirectToAuthentication";
 import LoadingSpinner from "./LoadingSpinner";
 import { Link } from "react-router-dom";
+import StarRating from "./StarRating";
 function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logOut } = useAuth();
@@ -34,6 +35,9 @@ function HomePage() {
   const [savedRecipes, setSavedRecipes] = useState([]);
   //state to manage liked recipes
   const [likedRecipes, setLikedRecipes] = useState([]);
+  //state to manage recipe ratings
+  const [recipeRatings, setRecipeRatings] = useState({})
+  const [userRatings, setUserRatings] = useState({})
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -108,6 +112,29 @@ function HomePage() {
     try {
       const response = await fetch(url);
       const data = await response.json();
+
+      if(!Array.isArray(data)){
+        throw new Error ('Expected data to be an array')
+      }
+      for (let recipe of data){
+        const encodedRecipeId = encodeURIComponent(recipe.recipe.uri)
+        const ratingsResponse = await fetch(`http://localhost:3000/recipes/${encodedRecipeId}/ratings`);
+        const ratingsData = await ratingsResponse.json();
+        setRecipeRatings(prev => ({
+            ...prev, [recipe.recipe.uri] : {
+                ratings : ratingsData.ratings,
+                averageRating: ratingsData.averageRating
+            }
+        }));
+        if (isAuthenticated){
+            const userRatingResponse = await fetch(`http://localhost:3000/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`);
+            const userRatingData = await userRatingResponse.json();
+
+            setUserRatings(prev => ({
+                ...prev, [recipe.recipe.uri] : userRatingData.rating || 0
+            }));
+        }
+      }
       return data;
     } catch (error) {
       console.log(error);
@@ -147,7 +174,9 @@ function HomePage() {
 
   const handleRecipeCardClick = (e) => {
     const card = e.target.value;
-    card.classList.toggle("active");
+    if (card && card.classList){
+        card.classList.toggle("active");
+    }
   };
   if (isLoading) {
     return <LoadingSpinner />;
@@ -251,6 +280,36 @@ function HomePage() {
     }
   };
 
+  const handleRateRecipe = async(recipeId, rating) => {
+    if (!isAuthenticated){
+        navigate('/login')
+        return;
+    }
+    try{
+        const response = await fetch(`http://localhost:3000/recipes/rate`, {
+            method: 'POST',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify({
+                userId: user.id,
+                recipeId,
+                rating,
+            }),
+        });
+        const data = await response.json();
+
+        setRecipeRatings(prev => ({
+            ...prev, [recipeId] : {...prev[recipeId], averageRating: data.averageRating
+            }
+        }));
+
+        setUserRatings(prev => ({
+            ...prev, [recipeId]:rating
+        }));
+    }catch(error){
+        console.error('Error rating recipes', error)
+    }
+  };
+
   const isRecipeSaved = (recipeId) => {
     return savedRecipes.some((saved) => saved.recipeId === recipeId);
   };
@@ -262,30 +321,42 @@ function HomePage() {
   return (
     <>
       <Header />
+      <div className="top-section">
+        <div className="top-info">
+            <h1><span>Culinary Canvas</span></h1>
+            <p>The best place to leave your taste buds tingling</p>
+            <Link to="/login"><button className="top-section-button">Want to join in on the fun?Click here to join!</ button></Link>
+        </div>
+        <div className="top-image">
+            <img src="../top-image-background-chanwalrus.jpg"/>
+        </div>
+        <div className="top-recipe-cards">
+            <div className="top-recipe-card">
+                <img src="../top-image-background-macaroons.jpg" alt="recipe-card-background-image"/>
+                <h3>Tasty Snacks</h3>
+            </div>
+            <div className="top-recipe-card">
+                <img src="../top-image-background-onions.jpg" alt="recipe-card-background-image"/>
+                <h3>Tasty Meals</h3>
+            </div>
+            <div className="top-recipe-card">
+                <img src="../top-image-background-pancakes.jpg" alt="recipe-card-background-image"/>
+                <h3>Healthy Life</h3>
+            </div>
+        </div>
+      </div>
       {isAuthenticated && user ? (
-        <div>
           <div className="user-information">
             <Link to={`/login/${user.id}`}>
-              <img
-                className="profile-picture"
-                src={user.imageUrl}
-                alt={`${user.name}'s profile picture`}
-              />
+              <img className="profile-picture" src={user.imageUrl} alt={`${user.name}'s profile picture`}/>
             </Link>
             <p>Hi @{user.name}</p>
-            <button id="LogOutButton" onClick={LogOut}>
-              Log Out
-            </button>
+            <button id="LogOutButton" onClick={LogOut}>Log Out</button>
           </div>
-        </div>
       ) : (
         <div className="user-authentication">
-          <button className="user-log-in">
-            <Link to="/login">Log In</Link>
-          </button>
-          <button className="user-sign-up">
-            <Link to="/create">Sign Up</Link>
-          </button>
+          <button className="user-log-in"><Link to="/login">Log In</Link></button>
+          <button className="user-sign-up"><Link to="/create">Sign Up</Link></button>
         </div>
       )}
       <div className="search-form">
@@ -358,6 +429,9 @@ function HomePage() {
               <img src={result.recipe.image} alt={result.recipe.label} />
               <h3>{result.recipe.label}</h3>
               <p>Calories: {Math.round(result.recipe.calories)}</p>
+              <StarRating rating={userRatings[result.recipe.uri] || 0}
+                averageRating={recipeRatings[result.recipe.uri] ? recipeRatings[result.recipe.uri].averageRating : 0}
+                onRate={(rating) => handleRateRecipe(result.recipe.uri, rating)}/>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -417,6 +491,9 @@ function HomePage() {
                       <p onClick={handleHomePageClick}>
                         Calories: {Math.round(recipeData.recipe.calories)}
                       </p>
+                      <StarRating rating={userRatings[recipeData.recipe.uri] || 0}
+                      averageRating={recipeRatings[recipeData.recipe.uri] ? recipeRatings[recipeData.recipe.uri].averageRating : 0}
+                      onRate={(rating) => handleRateRecipe(recipeData.recipe.uri, rating)}/>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

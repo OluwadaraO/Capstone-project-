@@ -1,14 +1,16 @@
 import "./UserProfile.css";
 import { Link } from "react-router-dom";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./RedirectToAuthentication";
 import GroceryList from "./GroceryList";
 import SavedRecipes from "./SavedRecipes";
+import ProfilePictureModal from "./ProfilePictureModal";
 
 function UserProfile() {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const handleLogOut = async () => {
     try {
       await logOut();
@@ -25,6 +27,37 @@ function UserProfile() {
     navigate("/find-recipes");
   };
 
+  const openModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleUpload = async(file) => {
+    const formData = new FormData();
+    formData.append('profilePicture', file)
+    formData.append('userId', user.id);
+    try{
+        const response = await fetch(`http://localhost:3000/upload-profile-picture`, {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await response.json();
+        if (response.ok){
+            user.imageUrl = data.imageUrl;
+            closeModal()
+        }
+        else{
+            console.error('Failed to upload profile picture: ', data.error)
+        }
+    }catch(error){
+        console.error('Error uploading profile picture: ', error)
+    }
+  }
+
+
   return (
     <div className="dashboard-container">
       <div className="profile-section">
@@ -32,6 +65,7 @@ function UserProfile() {
           src={user.imageUrl}
           alt={`${user.name}'s profile`}
           className="profile-picture"
+          onClick={openModal}
         />
         <h1>Welcome back {user.name}</h1>
         <button onClick={handleFindRecipe}>
@@ -56,6 +90,7 @@ function UserProfile() {
       <div className="recommended-recipes">
         <h2>Recommended Recipes</h2>
       </div>
+      <ProfilePictureModal isOpen={isModalOpen} onClose={closeModal} onUpload={handleUpload}/>
     </div>
   );
 }

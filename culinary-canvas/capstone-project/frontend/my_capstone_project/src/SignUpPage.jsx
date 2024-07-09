@@ -6,27 +6,40 @@ function Sign_Up_Page() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [uploadImage, setUploadImage] = useState(false)
   const navigate = useNavigate();
 
+  const handleFileChange =  (event) => {
+    setSelectedFile(event.target.files[0])
+  }
   const handleUserSignUp = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append('userName', userName);
+    formData.append('name', name);
+    formData.append('password', password);
+    if(uploadImage && selectedFile){
+        formData.append('profilePicture', selectedFile)
+    }
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_ADDRESS}/create`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          body: formData,
           credentials: "include",
-          body: JSON.stringify({ userName, password, name }),
+
         }
       );
       if (response.ok) {
         navigate("/login");
         alert("Please log in...");
       } else {
-        alert(
+        const data = await response.json()
+        setError(data.message)
+        alert(data.message ||
           "Oops! This username already exists. Please try another username"
         );
       }
@@ -77,6 +90,13 @@ function Sign_Up_Page() {
                   required
                 />
               </div>
+              <label>
+                <input type="checkbox" checked={uploadImage} onChange={() => setUploadImage(!uploadImage)}/>
+                    Want to Upload a profile picture? Click on the checkbox
+              </label>
+              {uploadImage && (
+                <input type="file" name="profilePicture" accept="image/*" onChange={handleFileChange}/>
+              )}
             </div>
             {error && <p>{error}</p>}
             <button type="submit" className="sign-up">
