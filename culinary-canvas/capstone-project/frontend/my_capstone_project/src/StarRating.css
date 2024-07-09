@@ -1,0 +1,11 @@
+.star-rating {
+    display: flex;
+    align-items: center;
+    color: gold;
+}
+
+.star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: gold;
+}

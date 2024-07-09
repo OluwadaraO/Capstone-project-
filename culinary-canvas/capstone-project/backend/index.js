@@ -7,7 +7,12 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const multer = require('multer')
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary')
+const CLOUDINARY_NAME = process.env.CLOUD_NAME
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
+const ClOUDINARY_API_SECRET = process.env.CLOUDINARY_SECRET
 const saltRounds = 14;
 const secretKey = process.env.JWT_SECRET_TOKEN
 const app = express()
@@ -23,6 +28,40 @@ app.use(cors(
         credentials: true,
     }
 ))
+
+cloudinary.config({
+    cloud_name: CLOUDINARY_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: ClOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'profile_pictures',
+        allowed_formats: ['jpg', 'png'],
+    },
+});
+const upload = multer({ storage: storage })
+
+app.post('/upload-profile-picture', upload.single('profilePicture'), async (req, res) => {
+    const { userId } = req.body;
+
+    if (!req.file || !userId) {
+        return res.status(400).json({ error: 'Invalid request' });
+    }
+
+    try {
+        const updatedUser = await prisma.users.update({
+            where: { id: parseInt(userId) },
+            data: { imageUrl: req.file.path },
+        });
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.error('Error updating profile picture: ', error);
+        res.status(500).json({ error: 'Failed to update profile picture' })
+    }
+})
 
 //to fetch a random image for users's profile
 const fetchRandomProfileImage = async () => {
@@ -45,7 +84,7 @@ const fetchRandomProfileImage = async () => {
 }
 
 //to create a new users's account
-app.post('/create', async (req, res) => {
+app.post('/create', upload.single('profilePicture'), async (req, res) => {
     const { userName, name, password } = req.body;
     try {
         const existingUser = await prisma.users.findUnique({ where: { userName } })
@@ -53,7 +92,13 @@ app.post('/create', async (req, res) => {
             return res.status(400).json({ message: "Oops! users already exists." })
         }
         const hashed = await bcrypt.hash(password, saltRounds);
-        const imageUrl = await fetchRandomProfileImage();
+        let imageUrl;
+        if (req.file) {
+            imageUrl = req.file.path
+        }
+        else if (!req.file) {
+            imageUrl = await fetchRandomProfileImage();
+        }
         const newUserAccount = await prisma.users.create({
             data: {
                 userName,
@@ -371,6 +416,73 @@ app.post('/recommendations', async (req, res) => {
     } catch (error) {
         console.error('Error fetching recommendations: ', error);
         res.status(500).json({ error: 'Failed to fetch recommendations' })
+    }
+})
+
+app.post('/recipes/rate', async (req, res) => {
+    const { userId, recipeId, rating } = req.body;
+    try {
+        const existingRating = await prisma.rating.findUnique({
+            where: {
+                userId_recipeId: { userId, recipeId }
+            }
+        })
+        if (existingRating) {
+            await prisma.rating.update({
+                where: {
+                    userId_recipeId: { userId, recipeId }
+                },
+                data: {
+                    rating
+                }
+            });
+        } else {
+            await prisma.rating.create({
+                data: {
+                    userId,
+                    recipeId,
+                    rating
+                }
+            });
+        }
+        const ratings = await prisma.rating.findMany({
+            where: { recipeId }
+        });
+        const averageRating = ratings.length ? ratings.reduce((acc, { rating }) => acc + rating, 0) / ratings.length : 0;
+        res.json({ averageRating })
+    } catch (error) {
+        console.error('Error fetching recipe: ', error)
+        res.status(500).json({ error: 'Failed to rate recipe' })
+    }
+});
+
+app.get('/recipes/:recipeId/ratings', async (req, res) => {
+    const { recipeId } = req.params;
+    try {
+        const ratings = await prisma.rating.findMany({
+            where: { recipeId }
+        });
+        const averageRating = ratings.length ? ratings.reduce((acc, { rating }) => acc + rating, 0) / ratings.length : 0;
+        res.json({ ratings, averageRating })
+    } catch (error) {
+        console.error('Error fetching ratings: ', error);
+        res.status(500).json({ error: 'Failed to fetch ratings' })
+    }
+})
+
+app.get('/recipes/:recipeId/user-rating', async (req, res) => {
+    const { recipeId } = req.params;
+    const { userId } = req.query;
+    try {
+        const userRating = await prisma.rating.findUnique({
+            where: {
+                userId_recipeId: { userId: parseInt(userId), recipeId }
+            }
+        });
+        res.json({ rating: userRating ? userRating.rating : 0 })
+    } catch (error) {
+        console.error('Error fetching user rating: ', error)
+        res.status(500).json('Failed to fetch', error)
     }
 })
 
