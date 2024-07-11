@@ -7,6 +7,30 @@ function DietaryRestrictions() {
     dietaryPreferences: [],
     favoriteFoods: [],
   });
+  const dietaryLabels = ["Gluten-free",
+    "Sugar-Conscious",
+    "Kidney-Friendly",
+    "Egg-Free",
+    "Peanut-Free",
+    "Tree-Nut-Free",
+    "Soy-Free",
+    "Fish-Free",
+    "Shellfish-Free",
+    "Pork-Free",
+    "Red-Meat-Free",
+    "Crustacean-Free",
+    "Celery-Free",
+    "Mustard-Free",
+    "Sesame-Free",
+    "Lupine-Free",
+    "Mollusk-Free",
+    "Alcohol-Free",
+    "Sulfite-Free",
+    "Vegetarian",
+    "Pescatarian",
+    "Wheat-Free",
+    "Kosher",
+    "Immuno-Supportive"]
   const [edit, setEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
@@ -21,7 +45,7 @@ function DietaryRestrictions() {
           const data = await response.json();
           setPreferences({
             cookingLevel: data.cookingLevel || "",
-            dietaryPreferences: data.dietaryRestrictions || [],
+            dietaryPreferences: data.dietaryPreferences|| [],
             favoriteFoods: data.favoriteFoods || [],
           });
           setLoading(false);
@@ -48,13 +72,24 @@ function DietaryRestrictions() {
     const newFavoriteFood = [...preferences.favoriteFoods];
     newFavoriteFood[index] = event.target.value;
     setPreferences((prev) => ({ ...prev, favoriteFoods: newFavoriteFood }));
+
   };
 
   const handleAddFavoriteFood = () => {
-    setPreferences((prev) => ({
-      ...prev,
-      favoriteFoods: [...prev.favoriteFoods, ""],
-    }));
+    const lastFood = preferences.favoriteFoods[preferences.favoriteFoods.length - 1]
+    if (lastFood.trim() === ''){
+        alert('Please fill in the current favorite food before adding a new one')
+        return;
+    }
+    if (preferences.favoriteFoods.length <= 10){
+        setPreferences((prev) => ({
+            ...prev,
+            favoriteFoods: [...prev.favoriteFoods, ""],
+          }));
+    }
+    else if(preferences.favoriteFoods.length > 10){
+        alert("You've exceeded the maximum length. Please try again.")
+    }
   };
 
   const handleRemoveFavoriteFood = (index) => {
@@ -129,7 +164,6 @@ function DietaryRestrictions() {
               onChange={(e) =>
                 setPreferences({ ...preferences, cookingLevel: e.target.value })
               }
-              required
             >
               <option value="">Select your cooking level</option>
               <option value="Beginner">Beginner</option>
@@ -141,260 +175,12 @@ function DietaryRestrictions() {
           <div>
             <label>Dietary Preferences (Optional): </label>
             <div>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Gluten-free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Gluten-free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Gluten-free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Sugar-Conscious"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Sugar-Conscious"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Sugar-Conscious
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Kidney-Friendly"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Kidney-Friendly"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Kidney-Friendly
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Egg-Free"
-                  checked={preferences.dietaryPreferences.includes("Egg-Free")}
-                  onChange={handleCheckboxChange}
-                />
-                Egg-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Peanut-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Peanut-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Peanut-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Tree-Nut-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Tree-Nut-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Tree-Nut-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Soy-Free"
-                  checked={preferences.dietaryPreferences.includes("Soy-Free")}
-                  onChange={handleCheckboxChange}
-                />
-                Soy-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Fish-Free"
-                  checked={preferences.dietaryPreferences.includes("Fish-Free")}
-                  onChange={handleCheckboxChange}
-                />
-                Fish-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Shellfish-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Shellfish-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Shellfish-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Pork-Free"
-                  checked={preferences.dietaryPreferences.includes("Pork-Free")}
-                  onChange={handleCheckboxChange}
-                />
-                Pork-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Red-Meat-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Red-Meat-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Red-Meat-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Crustacean-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Crustacean-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Crustacean-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Celery-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Celery-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Celery-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Mustard-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Mustard-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Mustard-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Sesame-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Sesame-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Sesame-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Lupine-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Lupine-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Lupine-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Mollusk-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Mollusk-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Mollusk-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Alcohol-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Alcohol-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Alcohol-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Sulfite-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Sulfite-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Sulfite-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Vegetarian"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Vegetarian"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Vegetarian
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Pescatarian"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Pescatarian"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Pescatarian
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Wheat-Free"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Wheat-Free"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Wheat-Free
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Kosher"
-                  checked={preferences.dietaryPreferences.includes("Kosher")}
-                  onChange={handleCheckboxChange}
-                />
-                Kosher
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Immuno-Supportive"
-                  checked={preferences.dietaryPreferences.includes(
-                    "Immuno-Supportive"
-                  )}
-                  onChange={handleCheckboxChange}
-                />
-                Immuno-Supportive
-              </label>
+                {dietaryLabels.map((label) => (
+                    <label key={label}>
+                        <input type="checkbox" value={label} checked={preferences.dietaryPreferences.includes(label)} onChange={handleCheckboxChange}/>
+                        {label}
+                    </label>
+                ))}
             </div>
           </div>
           <div>
@@ -414,9 +200,11 @@ function DietaryRestrictions() {
                 </button>
               </div>
             ))}
-            <button type="button" onClick={handleAddFavoriteFood}>
-              Add Favorite Food
-            </button>
+            {preferences.favoriteFoods.length <= 10 && (
+                <button type="button" onClick={handleAddFavoriteFood}>
+                Add Favorite Food
+                </button>
+            )}
           </div>
           <button type="submit" disabled={loading}>
             {loading ? "Saving..." : "Save Preferences"}

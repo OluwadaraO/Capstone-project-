@@ -14,6 +14,7 @@ function Sign_Up_Page() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
+  const minimumPassword = import.meta.env.VITE_MINIMUM_PASSWORD_LENGTH;
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -36,10 +37,12 @@ function Sign_Up_Page() {
         credentials: "include",
       });
       setLoading(false);
-      if (password.length < 6) {
+      if (password.length < minimumPassword) {
         alert("Password too short. Please use a different password");
+        return;
       } else if (password.length == 0) {
         alert("Password is empty. Please try again");
+        return;
       } else if (response.ok) {
         const data = await response.json()
         alert("Registration successful!");
@@ -106,7 +109,7 @@ function Sign_Up_Page() {
                   checked={uploadImage}
                   onChange={() => setUploadImage(!uploadImage)}
                 />
-                Want to Upload a profile picture? Click on the checkbox
+                Want to upload a profile picture? Click on the checkbox
               </label>
               {uploadImage && (
                 <input
