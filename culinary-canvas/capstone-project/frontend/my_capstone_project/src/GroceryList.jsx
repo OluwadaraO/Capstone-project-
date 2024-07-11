@@ -5,13 +5,12 @@ function GroceryList() {
   const { user } = useAuth();
   const [groceryItems, setGroceryItems] = useState([]);
   const [newItem, setNewItem] = useState({ itemName: "", quantity: 1 });
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   useEffect(() => {
     const fetchGroceryItems = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/grocery/${user.id}`
-        );
+        const response = await fetch(`${backendAddress}/grocery/${user.id}`);
         const data = await response.json();
         setGroceryItems(data);
       } catch (error) {
@@ -29,7 +28,7 @@ function GroceryList() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3000/grocery`, {
+      const response = await fetch(`${backendAddress}/grocery`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, ...newItem }),
@@ -44,7 +43,7 @@ function GroceryList() {
 
   const handleUpdateItem = async (id, updatedItem) => {
     try {
-      const respnse = await fetch(`http://localhost:3000/grocery/${id}`, {
+      const respnse = await fetch(`${backendAddress}/grocery/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedItem),
@@ -60,7 +59,7 @@ function GroceryList() {
 
   const handleDeleteItem = async (id) => {
     try {
-      await fetch(`http://localhost:3000/grocery/${id}`, {
+      await fetch(`${backendAddress}/grocery/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });

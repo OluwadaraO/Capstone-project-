@@ -4,12 +4,13 @@ const RedirectToAuthentication = createContext();
 export const AuthorizationContext = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const backendAddress =import.meta.env.VITE_BACKEND_ADDRESS
 
   useEffect(() => {
     const checkAuthorization = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_ADDRESS}/protected`,
+          `${backendAddress}/protected`,
           {
             method: "GET",
             credentials: "include",
@@ -39,7 +40,7 @@ export const AuthorizationContext = ({ children }) => {
 
   const logOut = async () => {
     try {
-      await fetch("http://localhost:3000/logout", {
+      await fetch(`${backendAddress}/logout`, {
         method: "POST",
         credentials: "include",
       });

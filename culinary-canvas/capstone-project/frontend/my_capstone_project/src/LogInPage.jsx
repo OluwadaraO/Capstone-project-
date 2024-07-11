@@ -2,28 +2,25 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./RedirectToAuthentication";
 import "./LogInPage.css";
-import Header from "./Header";
 
 function Log_In_Page() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   const handleUserLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_ADDRESS}/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ userName, password }),
-        }
-      );
+      const response = await fetch(`${backendAddress}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ userName, password }),
+      });
       if (response.ok) {
         const user = await response.json();
         login(user.userRecord);

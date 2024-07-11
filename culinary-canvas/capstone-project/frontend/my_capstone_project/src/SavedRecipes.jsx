@@ -4,11 +4,10 @@ import { useAuth } from "./RedirectToAuthentication";
 function SavedRecipes() {
   const { user, logOut } = useAuth();
   const [savedRecipe, setSavedRecipe] = useState([]);
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   const fetchSavedRecipes = async () => {
-    const response = await fetch(
-      `http://localhost:3000/recipes/save/${user.id}`
-    );
+    const response = await fetch(`${backendAddress}/recipes/save/${user.id}`);
     const data = await response.json();
     setSavedRecipe(data);
   };

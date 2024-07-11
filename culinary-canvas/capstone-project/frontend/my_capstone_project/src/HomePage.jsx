@@ -6,6 +6,7 @@ import { useAuth } from "./RedirectToAuthentication";
 import LoadingSpinner from "./LoadingSpinner";
 import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
+import RecipeOfTheDay from "./RecipeOfTheDay";
 function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logOut } = useAuth();
@@ -36,15 +37,16 @@ function HomePage() {
   //state to manage liked recipes
   const [likedRecipes, setLikedRecipes] = useState([]);
   //state to manage recipe ratings
-  const [recipeRatings, setRecipeRatings] = useState({})
-  const [userRatings, setUserRatings] = useState({})
+  const [recipeRatings, setRecipeRatings] = useState({});
+  const [userRatings, setUserRatings] = useState({});
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   useEffect(() => {
     if (isAuthenticated && user) {
       const fetchSavedRecipes = async () => {
         try {
           const response = await fetch(
-            `http://localhost:3000/recipes/save/${user.id}`
+            `${backendAddress}/recipes/save/${user.id}`
           );
           const data = await response.json();
 
@@ -63,7 +65,7 @@ function HomePage() {
       const fetchLikedRecipes = async () => {
         try {
           const response = await fetch(
-            `http://localhost:3000/recipes/liked/${user.id}`
+            `${backendAddress}/recipes/liked/${user.id}`
           );
           const data = await response.json();
           if (Array.isArray(data)) {
@@ -100,7 +102,7 @@ function HomePage() {
 
   //function to fetch recipies for a given query from Edamam API
   const fetchRecipies = async (searchQuery, filterQueries) => {
-    let url = `http://localhost:3000/recipes?`;
+    let url = `${backendAddress}/recipes?`;
 
     if (searchQuery) {
       url += `category=${searchQuery}&`;
@@ -113,31 +115,37 @@ function HomePage() {
       const response = await fetch(url);
       const data = await response.json();
 
-      if(!Array.isArray(data)){
-        throw new Error ('Expected data to be an array')
+      if (!Array.isArray(data)) {
+        throw new Error("Expected data to be an array");
       }
-      for (let recipe of data){
-        const encodedRecipeId = encodeURIComponent(recipe.recipe.uri)
-        const ratingsResponse = await fetch(`http://localhost:3000/recipes/${encodedRecipeId}/ratings`);
+      for (let recipe of data) {
+        const encodedRecipeId = encodeURIComponent(recipe.recipe.uri);
+        const ratingsResponse = await fetch(
+          `${backendAddress}/recipes/${encodedRecipeId}/ratings`
+        );
         const ratingsData = await ratingsResponse.json();
-        setRecipeRatings(prev => ({
-            ...prev, [recipe.recipe.uri] : {
-                ratings : ratingsData.ratings,
-                averageRating: ratingsData.averageRating
-            }
+        setRecipeRatings((prev) => ({
+          ...prev,
+          [recipe.recipe.uri]: {
+            ratings: ratingsData.ratings,
+            averageRating: ratingsData.averageRating,
+          },
         }));
-        if (isAuthenticated){
-            const userRatingResponse = await fetch(`http://localhost:3000/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`);
-            const userRatingData = await userRatingResponse.json();
+        if (isAuthenticated) {
+          const userRatingResponse = await fetch(
+            `${backendAddress}/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`
+          );
+          const userRatingData = await userRatingResponse.json();
 
-            setUserRatings(prev => ({
-                ...prev, [recipe.recipe.uri] : userRatingData.rating || 0
-            }));
+          setUserRatings((prev) => ({
+            ...prev,
+            [recipe.recipe.uri]: userRatingData.rating || 0,
+          }));
         }
       }
       return data;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return [];
     }
   };
@@ -174,8 +182,8 @@ function HomePage() {
 
   const handleRecipeCardClick = (e) => {
     const card = e.target.value;
-    if (card && card.classList){
-        card.classList.toggle("active");
+    if (card && card.classList) {
+      card.classList.toggle("active");
     }
   };
   if (isLoading) {
@@ -200,7 +208,7 @@ function HomePage() {
   const handleLike = async (recipe) => {
     const recipeId = recipe.recipe.uri;
     if (likedRecipes.some((liked) => liked.recipeId === recipeId)) {
-      await fetch(`http://localhost:3000/recipes/unlike`, {
+      await fetch(`${backendAddress}/recipes/unlike`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -213,7 +221,7 @@ function HomePage() {
       );
       updateRecipeLikes(recipeId, -1);
     } else {
-      const response = await fetch(`http://localhost:3000/recipes/like`, {
+      const response = await fetch(`${backendAddress}/recipes/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -253,7 +261,7 @@ function HomePage() {
 
   const handleSave = async (recipe) => {
     if (savedRecipes.some((saved) => saved.recipeId === recipe.recipe.uri)) {
-      await fetch(`http://localhost:3000/recipes/unsaved`, {
+      await fetch(`${backendAddress}/recipes/unsaved`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -265,7 +273,7 @@ function HomePage() {
         savedRecipes.filter((saved) => saved.recipeId !== recipe.recipe.uri)
       );
     } else {
-      const response = await fetch(`http://localhost:3000/recipes/saved`, {
+      const response = await fetch(`${backendAddress}/recipes/saved`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -280,33 +288,34 @@ function HomePage() {
     }
   };
 
-  const handleRateRecipe = async(recipeId, rating) => {
-    if (!isAuthenticated){
-        navigate('/login')
-        return;
+  const handleRateRecipe = async (recipeId, rating) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
     }
-    try{
-        const response = await fetch(`http://localhost:3000/recipes/rate`, {
-            method: 'POST',
-            headers: {'Content-Type' : 'application/json'},
-            body: JSON.stringify({
-                userId: user.id,
-                recipeId,
-                rating,
-            }),
-        });
-        const data = await response.json();
+    try {
+      const response = await fetch(`${backendAddress}/recipes/rate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          recipeId,
+          rating,
+        }),
+      });
+      const data = await response.json();
 
-        setRecipeRatings(prev => ({
-            ...prev, [recipeId] : {...prev[recipeId], averageRating: data.averageRating
-            }
-        }));
+      setRecipeRatings((prev) => ({
+        ...prev,
+        [recipeId]: { ...prev[recipeId], averageRating: data.averageRating },
+      }));
 
-        setUserRatings(prev => ({
-            ...prev, [recipeId]:rating
-        }));
-    }catch(error){
-        console.error('Error rating recipes', error)
+      setUserRatings((prev) => ({
+        ...prev,
+        [recipeId]: rating,
+      }));
+    } catch (error) {
+      console.error("Error rating recipes", error);
     }
   };
 
@@ -323,40 +332,65 @@ function HomePage() {
       <Header />
       <div className="top-section">
         <div className="top-info">
-            <h1><span>Culinary Canvas</span></h1>
-            <p>The best place to leave your taste buds tingling</p>
-            <Link to="/login"><button className="top-section-button">Want to join in on the fun?Click here to join!</ button></Link>
+          <h1>
+            <span>Culinary Canvas</span>
+          </h1>
+          <p>The best place to leave your taste buds tingling</p>
+          <Link to="/login">
+            <button className="top-section-button">
+              Want to join in on the fun?Click here to join!
+            </button>
+          </Link>
         </div>
         <div className="top-image">
-            <img src="../top-image-background-chanwalrus.jpg"/>
+          <img src="../top-image-background-chanwalrus.jpg" />
         </div>
         <div className="top-recipe-cards">
-            <div className="top-recipe-card">
-                <img src="../top-image-background-macaroons.jpg" alt="recipe-card-background-image"/>
-                <h3>Tasty Snacks</h3>
-            </div>
-            <div className="top-recipe-card">
-                <img src="../top-image-background-onions.jpg" alt="recipe-card-background-image"/>
-                <h3>Tasty Meals</h3>
-            </div>
-            <div className="top-recipe-card">
-                <img src="../top-image-background-pancakes.jpg" alt="recipe-card-background-image"/>
-                <h3>Healthy Life</h3>
-            </div>
+          <div className="top-recipe-card">
+            <img
+              src="../top-image-background-macaroons.jpg"
+              alt="recipe-card-background-image"
+            />
+            <h3>Tasty Snacks</h3>
+          </div>
+          <div className="top-recipe-card">
+            <img
+              src="../top-image-background-onions.jpg"
+              alt="recipe-card-background-image"
+            />
+            <h3>Tasty Meals</h3>
+          </div>
+          <div className="top-recipe-card">
+            <img
+              src="../top-image-background-pancakes.jpg"
+              alt="recipe-card-background-image"
+            />
+            <h3>Healthy Life</h3>
+          </div>
         </div>
       </div>
       {isAuthenticated && user ? (
-          <div className="user-information">
-            <Link to={`/login/${user.id}`}>
-              <img className="profile-picture" src={user.imageUrl} alt={`${user.name}'s profile picture`}/>
-            </Link>
-            <p>Hi @{user.name}</p>
-            <button id="LogOutButton" onClick={LogOut}>Log Out</button>
-          </div>
+        <div className="user-information">
+          <Link to={`/login/${user.id}`}>
+            <img
+              className="profile-picture"
+              src={user.imageUrl}
+              alt={`${user.name}'s profile picture`}
+            />
+          </Link>
+          <p>Hi @{user.name}</p>
+          <button id="LogOutButton" onClick={LogOut}>
+            Log Out
+          </button>
+        </div>
       ) : (
         <div className="user-authentication">
-          <button className="user-log-in"><Link to="/login">Log In</Link></button>
-          <button className="user-sign-up"><Link to="/create">Sign Up</Link></button>
+          <button className="user-log-in">
+            <Link to="/login">Log In</Link>
+          </button>
+          <button className="user-sign-up">
+            <Link to="/create">Sign Up</Link>
+          </button>
         </div>
       )}
       <div className="search-form">
@@ -422,6 +456,7 @@ function HomePage() {
         </label>
       </div>
       {isLoading && <LoadingSpinner />}
+
       {!isLoading && searchResults.length > 0 && (
         <div className="search-results">
           {searchResults.map((result, index) => (
@@ -429,9 +464,16 @@ function HomePage() {
               <img src={result.recipe.image} alt={result.recipe.label} />
               <h3>{result.recipe.label}</h3>
               <p>Calories: {Math.round(result.recipe.calories)}</p>
-              <StarRating rating={userRatings[result.recipe.uri] || 0}
-                averageRating={recipeRatings[result.recipe.uri] ? recipeRatings[result.recipe.uri].averageRating : 0}
-                onRate={(rating) => handleRateRecipe(result.recipe.uri, rating)}/>
+              <p>{result.recipe.totalTime}</p>
+              <StarRating
+                rating={userRatings[result.recipe.uri] || 0}
+                averageRating={
+                  recipeRatings[result.recipe.uri]
+                    ? recipeRatings[result.recipe.uri].averageRating
+                    : 0
+                }
+                onRate={(rating) => handleRateRecipe(result.recipe.uri, rating)}
+              />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -463,71 +505,86 @@ function HomePage() {
         </div>
       )}
       {!isLoading && searchResults.length === 0 && (
-        <div className="recipe-sections">
-          {/* loop through each query to create a section for each category */}
-          {queries.map((query) => (
-            <div key={query} className="recipe-section">
-              <h2>
-                Recommended {query.charAt(0).toUpperCase() + query.slice(1)}{" "}
-                Recipes
-              </h2>
-              <div className="recipe-scroll">
-                {Array.isArray(recipes[query]) &&
-                  recipes[query].length > 0 &&
-                  recipes[query].map((recipeData, index) => (
-                    <div
-                      key={index}
-                      className="recipe-card"
-                      onClick={handleRecipeCardClick}
-                    >
-                      <img
-                        src={recipeData.recipe.image}
-                        alt={recipeData.recipe.label}
-                        onClick={handleHomePageClick}
-                      />
-                      <h3 onClick={handleHomePageClick}>
-                        {recipeData.recipe.label}{" "}
-                      </h3>
-                      <p onClick={handleHomePageClick}>
-                        Calories: {Math.round(recipeData.recipe.calories)}
-                      </p>
-                      <StarRating rating={userRatings[recipeData.recipe.uri] || 0}
-                      averageRating={recipeRatings[recipeData.recipe.uri] ? recipeRatings[recipeData.recipe.uri].averageRating : 0}
-                      onRate={(rating) => handleRateRecipe(recipeData.recipe.uri, rating)}/>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleLike(recipeData);
-                        }}
+        <div>
+          <RecipeOfTheDay />
+          <div className="recipe-sections">
+            {/* loop through each query to create a section for each category */}
+            {queries.map((query) => (
+              <div key={query} className="recipe-section">
+                <h2>
+                  Recommended {query.charAt(0).toUpperCase() + query.slice(1)}{" "}
+                  Recipes
+                </h2>
+                <div className="recipe-scroll">
+                  {Array.isArray(recipes[query]) &&
+                    recipes[query].length > 0 &&
+                    recipes[query].map((recipeData, index) => (
+                      <div
+                        key={index}
+                        className="recipe-card"
+                        onClick={handleRecipeCardClick}
                       >
-                        {isRecipeLiked(recipeData.recipe.uri)
-                          ? "Unlike"
-                          : "Like"}
-                      </button>
-                      <p>Likes: {recipeData.likes}</p>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSave(recipeData);
-                        }}
-                      >
-                        {isRecipeSaved(recipeData.recipe.uri)
-                          ? "Added to Saved"
-                          : "Add to Saved"}
-                      </button>
-                      <a
-                        href={recipeData.recipe.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={handleHomePageClick}
-                      >
-                        View Recipe
-                      </a>
-                    </div>
-                  ))}
+                        <img
+                          src={recipeData.recipe.image}
+                          alt={recipeData.recipe.label}
+                          onClick={handleHomePageClick}
+                        />
+                        <h3 onClick={handleHomePageClick}>
+                          {recipeData.recipe.label}{" "}
+                        </h3>
+                        <p onClick={handleHomePageClick}>
+                          Calories: {Math.round(recipeData.recipe.calories)}
+                        </p>
+                        <p onClick={handleHomePageClick}>
+                          {recipeData.totalTime}
+                        </p>
+                        <StarRating
+                          rating={userRatings[recipeData.recipe.uri] || 0}
+                          averageRating={
+                            recipeRatings[recipeData.recipe.uri]
+                              ? recipeRatings[recipeData.recipe.uri]
+                                  .averageRating
+                              : 0
+                          }
+                          onRate={(rating) =>
+                            handleRateRecipe(recipeData.recipe.uri, rating)
+                          }
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike(recipeData);
+                          }}
+                        >
+                          {isRecipeLiked(recipeData.recipe.uri)
+                            ? "Unlike"
+                            : "Like"}
+                        </button>
+                        <p>Likes: {recipeData.likes}</p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSave(recipeData);
+                          }}
+                        >
+                          {isRecipeSaved(recipeData.recipe.uri)
+                            ? "Added to Saved"
+                            : "Add to Saved"}
+                        </button>
+                        <a
+                          href={recipeData.recipe.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleHomePageClick}
+                        >
+                          View Recipe
+                        </a>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </>

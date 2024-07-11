@@ -1,16 +1,19 @@
 import "./UserProfile.css";
 import { Link } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./RedirectToAuthentication";
 import GroceryList from "./GroceryList";
 import SavedRecipes from "./SavedRecipes";
 import ProfilePictureModal from "./ProfilePictureModal";
+import DietaryRestrictions from "./DietaryRestrictions";
 
 function UserProfile() {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
+
   const handleLogOut = async () => {
     try {
       await logOut();
@@ -28,35 +31,33 @@ function UserProfile() {
   };
 
   const openModal = () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true);
+  };
 
   const closeModal = () => {
-    setIsModalOpen(false)
-  }
+    setIsModalOpen(false);
+  };
 
-  const handleUpload = async(file) => {
+  const handleUpload = async (file) => {
     const formData = new FormData();
-    formData.append('profilePicture', file)
-    formData.append('userId', user.id);
-    try{
-        const response = await fetch(`http://localhost:3000/upload-profile-picture`, {
-            method: 'POST',
-            body: formData,
-        });
-        const data = await response.json();
-        if (response.ok){
-            user.imageUrl = data.imageUrl;
-            closeModal()
-        }
-        else{
-            console.error('Failed to upload profile picture: ', data.error)
-        }
-    }catch(error){
-        console.error('Error uploading profile picture: ', error)
+    formData.append("profilePicture", file);
+    formData.append("userId", user.id);
+    try {
+      const response = await fetch(`${backendAddress}/upload-profile-picture`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok) {
+        user.imageUrl = data.imageUrl;
+        closeModal();
+      } else {
+        console.error("Failed to upload profile picture: ", data.error);
+      }
+    } catch (error) {
+      console.error("Error uploading profile picture: ", error);
     }
-  }
-
+  };
 
   return (
     <div className="dashboard-container">
@@ -86,11 +87,16 @@ function UserProfile() {
       </div>
       <div className="dietary-restrictions">
         <h2>Dietary Restrictions</h2>
+        <DietaryRestrictions />
       </div>
       <div className="recommended-recipes">
         <h2>Recommended Recipes</h2>
       </div>
-      <ProfilePictureModal isOpen={isModalOpen} onClose={closeModal} onUpload={handleUpload}/>
+      <ProfilePictureModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onUpload={handleUpload}
+      />
     </div>
   );
 }

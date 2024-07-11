@@ -1,46 +1,56 @@
 import "./SignUpPage.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "./LoadingSpinner";
+import { useAuth } from "./RedirectToAuthentication";
 function Sign_Up_Page() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const {login, setUser} = useAuth()
   const [name, setName] = useState("");
   const [error, setError] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [uploadImage, setUploadImage] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadImage, setUploadImage] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
-  const handleFileChange =  (event) => {
-    setSelectedFile(event.target.files[0])
-  }
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
   const handleUserSignUp = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData();
-    formData.append('userName', userName);
-    formData.append('name', name);
-    formData.append('password', password);
-    if(uploadImage && selectedFile){
-        formData.append('profilePicture', selectedFile)
+    formData.append("userName", userName);
+    formData.append("name", name);
+    formData.append("password", password);
+    if (uploadImage && selectedFile) {
+      formData.append("profilePicture", selectedFile);
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_ADDRESS}/create`,
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-
-        }
-      );
-      if (response.ok) {
-        navigate("/login");
-        alert("Please log in...");
-      } else {
+      const response = await fetch(`${backendAddress}/create`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      setLoading(false);
+      if (password.length < 6) {
+        alert("Password too short. Please use a different password");
+      } else if (password.length == 0) {
+        alert("Password is empty. Please try again");
+      } else if (response.ok) {
         const data = await response.json()
-        setError(data.message)
-        alert(data.message ||
-          "Oops! This username already exists. Please try another username"
+        alert("Registration successful!");
+        login(data.newUserAccount)
+        navigate("/preferences");
+      } else {
+        const data = await response.json();
+        setError(data.message);
+        alert(
+          data.message ||
+            "Oops! This username already exists. Please try another username"
         );
       }
     } catch (error) {
@@ -91,11 +101,20 @@ function Sign_Up_Page() {
                 />
               </div>
               <label>
-                <input type="checkbox" checked={uploadImage} onChange={() => setUploadImage(!uploadImage)}/>
-                    Want to Upload a profile picture? Click on the checkbox
+                <input
+                  type="checkbox"
+                  checked={uploadImage}
+                  onChange={() => setUploadImage(!uploadImage)}
+                />
+                Want to Upload a profile picture? Click on the checkbox
               </label>
               {uploadImage && (
-                <input type="file" name="profilePicture" accept="image/*" onChange={handleFileChange}/>
+                <input
+                  type="file"
+                  name="profilePicture"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
               )}
             </div>
             {error && <p>{error}</p>}
@@ -103,6 +122,7 @@ function Sign_Up_Page() {
               Sign Up
             </button>
           </form>
+          {loading && <LoadingSpinner />}
         </div>
       </div>
     </div>
