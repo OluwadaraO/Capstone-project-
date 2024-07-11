@@ -3,20 +3,29 @@ require('dotenv').config();
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
+const fs = require('fs')
+const path = require('path')
+
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+
 const multer = require('multer')
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary')
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
 const CLOUDINARY_NAME = process.env.CLOUD_NAME
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
 const ClOUDINARY_API_SECRET = process.env.CLOUDINARY_SECRET
+
 const saltRounds = 14;
 const secretKey = process.env.JWT_SECRET_TOKEN
 const app = express()
 const PORT = 3000
+
+const RECIPE_FILE_PATH = path.join(__dirname, 'recipeOfTheDay.json')
 PEXELS_API_KEY = process.env.API_KEY
 EDAMAM_APP_ID = process.env.EDAMAM_API_ID_2
 EDAMAM_APP_KEY = process.env.EDAMAM_API_KEY_2
@@ -63,6 +72,21 @@ app.post('/upload-profile-picture', upload.single('profilePicture'), async (req,
     }
 })
 
+const readRecipeOfTheDay = () => {
+    if (fs.existsSync(RECIPE_FILE_PATH)) {
+        const data = fs.readFileSync(RECIPE_FILE_PATH, 'utf-8')
+        return JSON.parse(data);
+    } else {
+        return null;
+    }
+
+};
+
+const writeRecipeOfTheDay = (recipe) => {
+    const data = JSON.stringify(recipe, null, 2)
+    fs.writeFileSync(RECIPE_FILE_PATH, data)
+}
+
 //to fetch a random image for users's profile
 const fetchRandomProfileImage = async () => {
     try {
@@ -107,7 +131,14 @@ app.post('/create', upload.single('profilePicture'), async (req, res) => {
                 imageUrl: imageUrl
             }
         });
-        res.status(200).json(newUserAccount)
+        const token = jwt.sign({id : newUserAccount.id}, secretKey, {expiresIn: '24h'})
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 86400000,
+        })
+        res.status(200).json({token, newUserAccount})
     }
     catch (error) {
         console.error("Error posting data:", error);
@@ -130,12 +161,13 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: "Wrong password and username please try again" })
         }
         else {
-            const token = jwt.sign({ id: userRecord.id }, secretKey, { expiresIn: '1h' })
+            res.clearCookie('token')
+            const token = jwt.sign({ id: userRecord.id }, secretKey, { expiresIn: '24h' })
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 3600000,
+                maxAge: 86400000,
             })
 
             res.status(200).json({ token, userRecord })
@@ -227,6 +259,49 @@ app.get('/recipes', async (req, res) => {
     }
 })
 
+const fetchRandomRecipe = async () => {
+    const categories = ['chicken', 'beef', 'fish', 'rice', 'cookies', 'cheese', 'salad', 'beans', 'stew', 'egg', 'fish', 'pork', 'lettuce', 'mango', 'yam', 'potatoes', 'turkey', 'tomatoes', 'spaghetti', 'pasta']
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)]
+    const url = `https://api.edamam.com/search?q=${randomCategory}&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`
+    try {
+        const response = await fetch(url)
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        else {
+            const data = await response.json()
+            const recipes = data.hits
+            if (recipes.length > 0) {
+                const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)].recipe;
+                return randomRecipe
+            } else {
+                throw new Error('No recipes found!')
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching recipe from Edamam: ', error)
+        throw error
+    }
+}
+
+app.get('/recipe-of-the-day', async (req, res) => {
+    try {
+        let recipeOfTheDay = await readRecipeOfTheDay();
+        const currentTime = new Date().getTime();
+        if (!recipeOfTheDay || currentTime - new Date(recipeOfTheDay.timestamp).getTime() > 24 * 60 * 60 * 1000) {
+            const randomRecipe = await fetchRandomRecipe();
+
+            recipeOfTheDay = {
+                ...randomRecipe, timestamp: new Date().toISOString()
+            };
+            writeRecipeOfTheDay(recipeOfTheDay)
+        }
+        res.json(recipeOfTheDay)
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+})
+
 //to like a recipe
 app.post('/recipes/like', async (req, res) => {
     const { userId, recipeId, recipeName, recipeImage } = req.body;
@@ -243,6 +318,63 @@ app.post('/recipes/like', async (req, res) => {
     }
     catch (error) {
         res.status(500).json(error)
+    }
+})
+
+app.post('/save-preferences', async (req, res) => {
+    const { userId, cookingLevel, dietaryPreferences = [], favoriteFoods = [] } = req.body;
+    try {
+        const userPreferences = await prisma.userPreferences.create({
+            data: {
+                userId: parseInt(userId),
+                cookingLevel,
+                dietaryPreferences,
+                favoriteFoods
+            }
+        });
+        res.status(200).json(userPreferences)
+    } catch (error) {
+        console.error('Error saving user preferences: ', error)
+        res.status(500).json({ error: 'Failed to save user preferences: ' })
+    }
+});
+
+app.put('/update-preferences', async (req, res) => {
+    const { userId, cookingLevel, dietaryPreferences = [], favoriteFoods = [] } = req.body;
+    try {
+        const userPreferences = await prisma.userPreferences.upsert({
+            where: { userId },
+            update: {
+                cookingLevel,
+                dietaryPreferences,
+                favoriteFoods
+            },
+            create: {
+                userId,
+                cookingLevel,
+                dietaryPreferences,
+                favoriteFoods
+            }
+        });
+        res.status(200).json(userPreferences)
+    } catch (error) {
+        console.error('Error updating user preferences: ', error)
+        res.status(500).json({ error: 'Failed to update user preferences' })
+    }
+})
+
+app.get('/preferences/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const preferences = await prisma.userPreferences.findUnique({
+            where: {
+                userId: parseInt(userId)
+            }
+        })
+        res.status(200).json(preferences || { cookingLevel: '', dietaryPreferences: [], favoriteFoods: [] })
+    } catch (error) {
+        console.error('Error fetching user preferences: ', error)
+        res.status(500).json({ error: 'Failed to fetch user preferences' })
     }
 })
 

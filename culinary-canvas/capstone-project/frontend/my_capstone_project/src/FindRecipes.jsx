@@ -4,21 +4,30 @@ import { useAuth } from "./RedirectToAuthentication";
 import LoadingSpinner from "./LoadingSpinner";
 function FindRecipes() {
   const { user } = useAuth();
-  const [ingredients, setIngredients] = useState(["", "", ""]);
+  const [ingredients, setIngredients] = useState([""]);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
-  const handleInputChange = (index, value) => {
+  const handleInputChange = (index, event) => {
     const newIngredients = [...ingredients];
-    newIngredients[index] = value;
+    newIngredients[index] = event.target.value;
     setIngredients(newIngredients);
   };
 
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, ""]);
+  };
+
+  const handleRemoveIngredient = (index) => {
+    const newIngredients = ingredients.filter((_, i) => i !== index);
+    setIngredients(newIngredients);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/recommendations", {
+      const response = await fetch(`${backendAddress}/recommendations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, ingredients }),
@@ -35,7 +44,7 @@ function FindRecipes() {
 
   const handleSaveRecipe = async (recipe) => {
     try {
-      const response = await fetch("http://localhost:3000/recipes/saved", {
+      const response = await fetch(`${backendAddress}/recipes/saved`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,7 +64,7 @@ function FindRecipes() {
 
   const handleLikeRecipe = async (recipe) => {
     try {
-      const response = await fetch("http://localhost:3000/recipes/like", {
+      const response = await fetch(`${backendAddress}/recipes/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -70,7 +79,6 @@ function FindRecipes() {
       }
     } catch (error) {
       console.error("Error fetching recipe: ", error);
-      console.log(error);
     }
   };
   return (
@@ -84,39 +92,29 @@ function FindRecipes() {
       <div className="find-recipes-container">
         <form onSubmit={handleSubmit}>
           <h2>Find Recipes</h2>
-          <div>
-            <label>
-              Ingredient 1:
-              <input
-                type="text"
-                name="ingredient1"
-                value={ingredients[0]}
-                onChange={(e) => handleInputChange(0, e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Ingredient 2:
-              <input
-                type="text"
-                name="ingredient2"
-                value={ingredients.ingredient2}
-                onChange={(e) => handleInputChange(1, e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Ingredient 3:
-              <input
-                type="text"
-                name="ingredient1"
-                value={ingredients.ingredient3}
-                onChange={(e) => handleInputChange(2, e.target.value)}
-              />
-            </label>
-          </div>
+          {ingredients.map((ingredient, index) => (
+            <div key={index}>
+              <label>
+                Ingredient {index + 1}
+                <input
+                  type="text"
+                  value={ingredient}
+                  onChange={(event) => handleInputChange(index, event)}
+                />
+              </label>
+              {index > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveIngredient(index)}
+                >
+                  Remove Ingredient
+                </button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={handleAddIngredient}>
+            Add Ingredient
+          </button>
           <button type="submit">Submit</button>
         </form>
         {loading && <LoadingSpinner />}

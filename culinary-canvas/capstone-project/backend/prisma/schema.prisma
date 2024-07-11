@@ -23,6 +23,16 @@ model Users{
   likedRecipes LikedRecipe[]
   groceryLists GroceryList[]
   ratings Rating[]
+  userPreferences UserPreferences?
+}
+
+model UserPreferences{
+  id Int  @id @default(autoincrement())
+  userId Int @unique
+  cookingLevel String
+  dietaryPreferences String[]
+  favoriteFoods String[]
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 }
 
 model SavedRecipe{
@@ -31,7 +41,7 @@ model SavedRecipe{
   recipeId String
   recipeName String
   recipeImage String
-  user Users @relation(fields: [userId], references:[id])
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 }
 
 model LikedRecipe{
@@ -40,7 +50,7 @@ model LikedRecipe{
   recipeId String
   recipeName String
   recipeImage String
-  user Users @relation(fields: [userId], references:[id])
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 }
 
 model GroceryList{
@@ -48,7 +58,7 @@ model GroceryList{
   userId Int
   itemName String
   quantity Int
-  user Users @relation(fields: [userId], references:[id])
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 }
 
 model Rating{
@@ -56,7 +66,7 @@ model Rating{
   userId Int
   recipeId String
   rating Int
-  user Users @relation(fields: [userId], references:[id])
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
 }

@@ -1,0 +1,74 @@
+.recipe-of-the-day{
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 800px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.recipe-content{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recipe-details{
+    max-width: 60%;
+}
+
+h2{
+    font-size: 2em;
+    color: #a52a2a;
+    margin-bottom: 10px;
+}
+
+h3{
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.recipe-description{
+    font-size: 1em;
+    color: #666;
+}
+
+.nutrition{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.nutrition p{
+    font-size: 1em;
+    color: #333;
+}
+
+.nutrition span{
+    font-weight: bold;
+}
+
+.prep-time{
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.recipe-image img{
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+@media(max-width: 786px){
+    .recipe-content{
+        flex-direction: column;
+    }
+    .recipe-details, .recipe-image{
+        max-width: 100%;
+    }
+    .recipe-details{
+        margin-bottom: 20px;
+    }
+}
