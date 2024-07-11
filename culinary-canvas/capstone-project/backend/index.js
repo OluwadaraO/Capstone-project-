@@ -1,34 +1,38 @@
 require('dotenv').config();
 
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const app = express()
 
-const fs = require('fs')
-const path = require('path')
-
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
-const multer = require('multer')
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const CLOUDINARY_NAME = process.env.CLOUD_NAME
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
 const ClOUDINARY_API_SECRET = process.env.CLOUDINARY_SECRET
+const CLOUDINARY_NAME = process.env.CLOUD_NAME
+
+const cors = require('cors');
+
+const EDAMAM_APP_ID = process.env.EDAMAM_API_ID_2
+const EDAMAM_APP_KEY = process.env.EDAMAM_API_KEY_2
+
+const fs = require('fs')
+const jwt = require('jsonwebtoken');
+const multer = require('multer')
+const path = require('path')
+
+const PORT = 3000
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+const RECIPE_FILE_PATH = path.join(__dirname, 'recipeOfTheDay.json')
+const PEXELS_API_KEY = process.env.API_KEY
 
 const saltRounds = 14;
 const secretKey = process.env.JWT_SECRET_TOKEN
-const app = express()
-const PORT = 3000
 
-const RECIPE_FILE_PATH = path.join(__dirname, 'recipeOfTheDay.json')
-PEXELS_API_KEY = process.env.API_KEY
-EDAMAM_APP_ID = process.env.EDAMAM_API_ID_2
-EDAMAM_APP_KEY = process.env.EDAMAM_API_KEY_2
 app.use(cookieParser())
 app.use(express.json())
 app.use(cors(
