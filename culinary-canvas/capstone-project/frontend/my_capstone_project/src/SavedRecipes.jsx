@@ -10,6 +10,7 @@ function SavedRecipes() {
     const response = await fetch(`${backendAddress}/recipes/save/${user.id}`);
     const data = await response.json();
     setSavedRecipe(data);
+    
   };
 
   useEffect(() => {
