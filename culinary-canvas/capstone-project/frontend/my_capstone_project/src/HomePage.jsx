@@ -323,13 +323,13 @@ function HomePage() {
     }
   };
 
-  const handleAddToPlanner = async (day, mealType, recipe) => {
-    try {
+  const handleAddToPlanner = async(day, mealType, recipe) => {
+    try{
       const response = await fetch(`${backendAddress}/meal-planner/add`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type" : "application/json"},
         body: JSON.stringify({
-          userId: user.id,
+          userId : user.id,
           day,
           mealType,
           recipeId: recipe.uri,
@@ -338,16 +338,16 @@ function HomePage() {
           recipeUrl: recipe.url,
         }),
       });
-      if (response.ok) {
+      if(response.ok){
         alert(`Added ${recipe.label} to ${day}`);
-        setIsModalOpen(false);
-      } else {
+        setIsModalOpen(false)
+      }else{
         const data = await response.json();
-        alert(`Failed to add recipe to planner: ${data.error}`);
+        alert(`Failed to add recipe to planner: ${data.error}`)
       }
-    } catch (error) {
+    }catch(error){
       console.error("Error adding recipe to planner: ", error);
-      alert("Failed to add recipe to planner");
+      alert("Failed to add recipe to planner")
     }
   };
 
@@ -525,12 +525,7 @@ function HomePage() {
                   ? "Added to Saved"
                   : "Add to Saved"}
               </button>
-              <button
-                onClick={() => {
-                  setSelectedrecipe(result.recipe);
-                  setIsModalOpen(true);
-                }}
-              >
+              <button onClick={() => {setSelectedrecipe(result.recipe); setIsModalOpen(true); }}>
                 +
               </button>
               <a
@@ -611,13 +606,8 @@ function HomePage() {
                             ? "Added to Saved"
                             : "Add to Saved"}
                         </button>
-                        <button
-                          onClick={() => {
-                            setSelectedrecipe(recipeData.recipe);
-                            setIsModalOpen(true);
-                          }}
-                        >
-                          +
+                        <button onClick={() => {setSelectedrecipe(recipeData.recipe); setIsModalOpen(true)}}>
+                            +
                         </button>
                         <a
                           href={recipeData.recipe.url}
@@ -635,12 +625,7 @@ function HomePage() {
           </div>
         </div>
       )}
-      <MealPlannerModal
-        recipe={selectedRecipe}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddToPlanner={handleAddToPlanner}
-      />
+      <MealPlannerModal recipe={selectedRecipe} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddToPlanner={handleAddToPlanner}/>
     </>
   );
 }
