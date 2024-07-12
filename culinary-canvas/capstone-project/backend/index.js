@@ -622,6 +622,66 @@ app.get('/recipes/:recipeId/user-rating', async (req, res) => {
     }
 })
 
+app.post('/meal-planner/add', async(req, res) => {
+    const {userId, day, mealType, recipeId, recipeName, recipeImage, recipeUrl} = req.body;
+    try{
+        const existingEntry = await prisma.mealPlanner.findFirst({
+            where: {userId : parseInt(userId), day}
+        })
+        let mealPlannerEntry;
+        if (existingEntry){
+            mealPlannerEntry = await prisma.mealPlanner.update({
+                where: {id : existingEntry.id},
+                data: {mealType, recipeId, recipeName, recipeImage, recipeUrl}
+            });
+        }else{
+            mealPlannerEntry = await prisma.mealPlanner.create({
+                data:{
+                    userId: parseInt(userId),
+                    day,
+                    mealType,
+                    recipeId,
+                    recipeName,
+                    recipeImage,
+                    recipeUrl
+                }
+            });
+        }
+        res.status(200).json(mealPlannerEntry);
+    }catch(error){
+        console.error('Error creating meal plan: ', error);
+        res.status(500).json({error: 'Failed to create meal plan'})
+    }
+})
+
+app.get('/meal-planner/:userId', async(req, res) => {
+    const {userId} = req.params;
+    try{
+        const mealPlanners = await prisma.mealPlanner.findMany({
+            where: {
+                userId: parseInt(userId)
+            }
+        });
+        res.status(200).json(mealPlanners)
+    }catch(error){
+        console.error('Error fetching meal plans: ', error)
+        res.status(500).json({error: 'Failed to fetch meal planners'})
+    }
+});
+
+app.delete('/meal-planner/:id', async(req, res) => {
+    const {id} = req.params;
+    try{
+        await prisma.mealPlanner.delete({
+            where: {id : parseInt(id)}
+        });
+        res.status(200).json({message: 'Meal plan deleted successfully'})
+    }catch(error){
+        console.error('Error deleting meal plan:', error)
+        res.status(500).json({error : 'Failed to delete meal plan'})
+}
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
 })
