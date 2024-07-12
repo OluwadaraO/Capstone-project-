@@ -24,6 +24,19 @@ model Users{
   groceryLists GroceryList[]
   ratings Rating[]
   userPreferences UserPreferences?
+  mealPlanners MealPlanner[]
+}
+
+model MealPlanner{
+  id Int @id @default(autoincrement())
+  userId Int
+  day String
+  mealType String
+  recipeId String
+  recipeName String
+  recipeImage String
+  recipeUrl String
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 }
 
 model UserPreferences{

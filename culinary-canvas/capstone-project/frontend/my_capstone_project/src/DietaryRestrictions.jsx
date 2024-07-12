@@ -77,7 +77,7 @@ function DietaryRestrictions() {
 
   const handleAddFavoriteFood = () => {
     const lastFood = preferences.favoriteFoods[preferences.favoriteFoods.length - 1]
-    if (lastFood.trim() === ''){
+    if ( preferences.favoriteFoods.length > 0 && lastFood.trim() === ''){
         alert('Please fill in the current favorite food before adding a new one')
         return;
     }

@@ -7,6 +7,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
 import RecipeOfTheDay from "./RecipeOfTheDay";
+import MealPlannerModal from "./MealPlannerModal";
 function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logOut } = useAuth();
@@ -21,6 +22,7 @@ function HomePage() {
     "cookies",
     "cheese",
     "salad",
+    "pasta",
   ];
   //state to manage search query
   const [query, setQuery] = useState("");
@@ -39,6 +41,8 @@ function HomePage() {
   //state to manage recipe ratings
   const [recipeRatings, setRecipeRatings] = useState({});
   const [userRatings, setUserRatings] = useState({});
+  const [selectedRecipe, setSelectedrecipe] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   useEffect(() => {
@@ -319,6 +323,34 @@ function HomePage() {
     }
   };
 
+  const handleAddToPlanner = async (day, mealType, recipe) => {
+    try {
+      const response = await fetch(`${backendAddress}/meal-planner/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          day,
+          mealType,
+          recipeId: recipe.uri,
+          recipeName: recipe.label,
+          recipeImage: recipe.image,
+          recipeUrl: recipe.url,
+        }),
+      });
+      if (response.ok) {
+        alert(`Added ${recipe.label} to ${day}`);
+        setIsModalOpen(false);
+      } else {
+        const data = await response.json();
+        alert(`Failed to add recipe to planner: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error adding recipe to planner: ", error);
+      alert("Failed to add recipe to planner");
+    }
+  };
+
   const isRecipeSaved = (recipeId) => {
     return savedRecipes.some((saved) => saved.recipeId === recipeId);
   };
@@ -493,6 +525,14 @@ function HomePage() {
                   ? "Added to Saved"
                   : "Add to Saved"}
               </button>
+              <button
+                onClick={() => {
+                  setSelectedrecipe(result.recipe);
+                  setIsModalOpen(true);
+                }}
+              >
+                +
+              </button>
               <a
                 href={result.recipe.url}
                 target="_blank"
@@ -571,6 +611,14 @@ function HomePage() {
                             ? "Added to Saved"
                             : "Add to Saved"}
                         </button>
+                        <button
+                          onClick={() => {
+                            setSelectedrecipe(recipeData.recipe);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          +
+                        </button>
                         <a
                           href={recipeData.recipe.url}
                           target="_blank"
@@ -587,6 +635,12 @@ function HomePage() {
           </div>
         </div>
       )}
+      <MealPlannerModal
+        recipe={selectedRecipe}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddToPlanner={handleAddToPlanner}
+      />
     </>
   );
 }

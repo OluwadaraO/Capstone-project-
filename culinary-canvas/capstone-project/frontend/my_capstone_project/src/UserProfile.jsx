@@ -7,6 +7,7 @@ import GroceryList from "./GroceryList";
 import SavedRecipes from "./SavedRecipes";
 import ProfilePictureModal from "./ProfilePictureModal";
 import DietaryRestrictions from "./DietaryRestrictions";
+import MealPlannerDashboard from "./MealPlannerDashboard";
 
 function UserProfile() {
   const { user, logOut } = useAuth();
@@ -90,7 +91,8 @@ function UserProfile() {
         <DietaryRestrictions />
       </div>
       <div className="recommended-recipes">
-        <h2>Recommended Recipes</h2>
+        <h2>Weekly Meal Planner</h2>
+        <MealPlannerDashboard/>
       </div>
       <ProfilePictureModal
         isOpen={isModalOpen}
