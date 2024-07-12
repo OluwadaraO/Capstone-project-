@@ -626,15 +626,13 @@ app.post('/meal-planner/add', async(req, res) => {
     const {userId, day, mealType, recipeId, recipeName, recipeImage, recipeUrl} = req.body;
     try{
         const existingEntry = await prisma.mealPlanner.findFirst({
-            where: {userId : parseInt(userId), day}
+            where: {userId : parseInt(userId), day, mealType}
         })
-        let mealPlannerEntry;
+
         if (existingEntry){
-            mealPlannerEntry = await prisma.mealPlanner.update({
-                where: {id : existingEntry.id},
-                data: {mealType, recipeId, recipeName, recipeImage, recipeUrl}
-            });
-        }else{
+            return res.status(400).json({error: 'A meal already exists for this day and meal type'})
+        }
+        else{
             mealPlannerEntry = await prisma.mealPlanner.create({
                 data:{
                     userId: parseInt(userId),
