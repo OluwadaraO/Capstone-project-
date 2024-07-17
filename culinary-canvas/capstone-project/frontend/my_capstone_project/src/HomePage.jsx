@@ -544,7 +544,7 @@ function HomePage() {
               {result.healthScore && (
                 <p>Health Score : {" "}
                 <span style={{color: result.healthColor}}>
-                  {result.healthScore}
+                  {Math.round(result.healthScore)}
                 </span>
                 </p>
               )}
@@ -632,7 +632,7 @@ function HomePage() {
                         {recipeData.healthScore && (
                           <p>Health Score : {" "}
                             <span style={{color: recipeData.healthColor}}>
-                              {recipeData.healthScore}
+                              {Math.round(recipeData.healthScore)}
                             </span>
                           </p>
                         )}

@@ -90,16 +90,15 @@ const upload = multer({ storage: storage })
 
 //find the lowest Nutrient
 const findLowestNutrient = (nutrientTotals) => {
-    let lowestNutrient = null;
-    let lowestValue = Infinity;
-
-    Object.keys(nutrientTotals).forEach((key) => {
-        if(nutrientTotals[key] < lowestValue){
-            lowestNutrient = key;
-            lowestValue = nutrientTotals[key]
+    return Object.keys(nutrientTotals).reduce((acc, key) => {
+        if(nutrientTotals[key] < acc.lowestValue){
+            return{
+            lowestNutrient: key,
+            lowestValue: nutrientTotals[key]
+            };
         }
-    });
-    return lowestNutrient;
+        return acc;
+    }, {lowestNutrient: null, lowestValue: Infinity}).lowestNutrient;
 };
 
 const capitalizeFirstLetter = (string) => {
@@ -114,9 +113,12 @@ const fetchRecipesHighInNutrient = async(nutrient) => {
         if (!data.hits){
             throw new Error('No recipes found!')
         }
-        const capitalizedNutrientLabel = capitalizeFirstLetter(nutrient)
+        let capitalizedNutrientLabel = capitalizeFirstLetter(nutrient)
         const filteredRecipes = data.hits.filter(hit => {
             const totalNutrients = hit.recipe.totalNutrients;
+            if (capitalizedNutrientLabel === 'Sugar'){
+                capitalizedNutrientLabel = 'Sugars'
+            };
             for (const nutrient in totalNutrients){
                 if (totalNutrients[nutrient].label === capitalizedNutrientLabel){
                     return true;
@@ -193,7 +195,7 @@ const fetchUserNotifications = async(userId) => {
         console.error('Error fetching user notifications: ', error);
         return{
             subject: 'Error',
-            message: 'There was an error fetchig your notifications.',
+            message: 'There was an error fetching your notifications.',
             recipes: [],
             nutrientTotals: {}
         }
@@ -258,9 +260,8 @@ cron.schedule('0 0 * * *', async() => {
 
     try{
         const users = await prisma.users.findMany();
-        for (const user of users){
-            await sendNotification(user.id)
-        }
+        const notificationPromises = users.map(user => sendNotification(user.id));
+        await Promise.all(notificationPromises)
     }catch(error){
         console.error('Error running scheduled notifications: ', error)
     }
