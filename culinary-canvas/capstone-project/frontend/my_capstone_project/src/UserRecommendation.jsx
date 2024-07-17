@@ -11,14 +11,22 @@ function UserRecommendation() {
   const [favoriteFoods, setFavoriteFoods] = useState([]);
   const [loading, setLoading] = useState(false);
   const dietaryLabels = [
-    "Gluten-free",
+    "High-Protein",
+    "Low-Carb",
+    "Low-Sodium",
     "Sugar-Conscious",
-    "Kidney-Friendly",
+    "Keto-Friendly",
+    "Pescatarian",
+    "Paleo",
+    "Mediterranean",
+    "DASH",
+    "Dairy-Free",
+    "Gluten-Free",
+    "Wheat-Free",
     "Egg-Free",
     "Peanut-Free",
     "Tree-Nut-Free",
     "Soy-Free",
-    "Fish-Free",
     "Shellfish-Free",
     "Pork-Free",
     "Red-Meat-Free",
@@ -28,13 +36,12 @@ function UserRecommendation() {
     "Sesame-Free",
     "Lupine-Free",
     "Mollusk-Free",
+    "Vegetarian",
+    "Vegan",
     "Alcohol-Free",
     "Sulfite-Free",
-    "Vegetarian",
-    "Pescatarian",
-    "Wheat-Free",
     "Kosher",
-    "Immuno-Supportive",
+    "Immuno-Supportive"
   ];
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 

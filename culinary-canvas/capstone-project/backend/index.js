@@ -9,16 +9,23 @@ const cookieParser = require('cookie-parser');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
+const {ALLERGENS, DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS} = require('./healthScoreConstants.js')
+const calculateHealthScore = require('./calculateHealthScore.js')
+
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
 const ClOUDINARY_API_SECRET = process.env.CLOUDINARY_SECRET
 const CLOUDINARY_NAME = process.env.CLOUD_NAME
 
+const cron = require('node-cron');
 const cors = require('cors');
 
 const EDAMAM_APP_ID = process.env.EDAMAM_API_ID_2
 const EDAMAM_APP_KEY = process.env.EDAMAM_API_KEY_2
 
 const fs = require('fs')
+const frontendAddress = process.env.FRONTEND_ADDRESS;
+
+const http = require('http')
 const jwt = require('jsonwebtoken');
 const multer = require('multer')
 const path = require('path')
@@ -33,11 +40,35 @@ const PEXELS_API_KEY = process.env.API_KEY
 const saltRounds = 14;
 const secretKey = process.env.JWT_SECRET_TOKEN
 
+const {Server} = require('socket.io')
+const server = http.createServer(app)
+const io = new Server(server, {
+    cors: {
+        origin: frontendAddress,
+        credentials: true,
+    }
+});
+io.on('connection', (socket) => {
+    console.log('New Client connected');
+    socket.on('subscribe', async(userId) => {
+        socket.join(userId.toString());
+        const notifications = await fetchUserNotifications(userId);
+        socket.emit('notifications', notifications);
+    });
+    socket.on('updateHealthScores', async(userId) => {
+        const healthScores = await fetchUserHealthScores(userId);
+        io.to(userId.toString()).emit('healthScoresUpdated', healthScores)
+    })
+    socket.on('disconnect', () => {
+        console.log('Client disconnected!')
+    });
+});
+
 app.use(cookieParser())
 app.use(express.json())
 app.use(cors(
     {
-        origin: 'http://localhost:5173',
+        origin: `${frontendAddress}`,
         credentials: true,
     }
 ))
@@ -57,6 +88,187 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage })
 
+//find the lowest Nutrient
+const findLowestNutrient = (nutrientTotals) => {
+    let lowestNutrient = null;
+    let lowestValue = Infinity;
+
+    Object.keys(nutrientTotals).forEach((key) => {
+        if(nutrientTotals[key] < lowestValue){
+            lowestNutrient = key;
+            lowestValue = nutrientTotals[key]
+        }
+    });
+    return lowestNutrient;
+};
+
+const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase()
+}
+
+//fetch recipes high in the lowest nutrient
+const fetchRecipesHighInNutrient = async(nutrient) => {
+    try{
+        const response = await fetch(`https://api.edamam.com/search?q=${nutrient}&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`);
+        const data = await response.json();
+        if (!data.hits){
+            throw new Error('No recipes found!')
+        }
+        const capitalizedNutrientLabel = capitalizeFirstLetter(nutrient)
+        const filteredRecipes = data.hits.filter(hit => {
+            const totalNutrients = hit.recipe.totalNutrients;
+            for (const nutrient in totalNutrients){
+                if (totalNutrients[nutrient].label === capitalizedNutrientLabel){
+                    return true;
+                }
+            }
+            return false;
+
+        })
+        return filteredRecipes.map(hit => ({
+            label: hit.recipe.label,
+            url: hit.recipe.url,
+            image: hit.recipe.image,
+            calories: hit.recipe.calories
+        }));
+
+
+    }catch(error){
+        console.error(`Error fetching recipes high in ${nutrient}: `, error)
+        return [];
+    }
+
+};
+
+//fetch user notifications
+const fetchUserNotifications = async(userId) => {
+    try{
+        const userPreferences = await prisma.userPreferences.findUnique({
+            where: {userId : userId}
+        });
+
+        const mealPlanner = await prisma.mealPlanner.findMany({
+            where: {userId : userId}
+        });
+
+        const recipeIds = mealPlanner.map(entry => entry.recipeId)
+
+        const fetchRecipeData = async(id)=>{
+            try{
+                const response = await fetch(`https://api.edamam.com/search?r=${encodeURIComponent(id)}&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`);
+                const data = await response.json();
+                if (!data[0]){
+                    console.error(`No data found for recipeId : ${id}`)
+                    return null;
+                }
+                return data[0];
+            }catch(error){
+                console.error('Error fetching recipe data: ', error);
+                return null;
+            }
+        };
+        const recipes = await Promise.all(recipeIds.map(id => fetchRecipeData(id)));
+        const nutrientTotals = recipes.reduce((totals, recipe) => {
+            const healthInfo = calculateHealthScore(recipe, userPreferences);
+            Object.keys(healthInfo.nutrients).forEach(nutrient => {
+                if (!totals[nutrient]){
+                    totals[nutrient] = 0;
+                }
+                totals[nutrient]  += healthInfo.nutrients[nutrient]
+            });
+            return totals
+        }, {});
+
+
+        const lowestNutrient = findLowestNutrient(nutrientTotals);
+        const recipesHighInNutrient = await fetchRecipesHighInNutrient(lowestNutrient)
+
+        return{
+            subject: 'Try this recipe!',
+            message: `We noticed you needed more ${lowestNutrient}. So we're suggesting these recipes: `,
+            recipes: recipesHighInNutrient,
+            nutrientTotals : nutrientTotals
+        };
+    }catch(error){
+        console.error('Error fetching user notifications: ', error);
+        return{
+            subject: 'Error',
+            message: 'There was an error fetchig your notifications.',
+            recipes: [],
+            nutrientTotals: {}
+        }
+    }
+
+};
+
+//send notifications to a user
+const sendNotification = async(userId) => {
+    try{
+        const notification = await fetchUserNotifications(userId)
+
+        const recipesHighInNutrient = await notification.recipes
+        await prisma.notification.create({
+            data:{
+                userId: userId,
+                subject: notification.subject,
+                message: notification.message,
+                recipes: recipesHighInNutrient,
+                read: false,
+            }
+        })
+        io.to(userId.toString()).emit('notification', notification);
+    }
+    catch(error){
+        console.error('Error sending notifications', error)
+    }
+};
+
+app.get('/notifications/:userId', async(req, res) => {
+const {userId} = req.params;
+    try{
+        const notifications = await prisma.notification.findMany({
+            where: {userId : parseInt(userId)},
+            orderBy: { createdAt: 'desc'}
+        });
+        res.status(200).json(notifications)
+    }catch(error){
+        console.error("Error fetching notifications: ", error)
+        res.status(500).json({error : 'Failed to fetch notifications.'})
+    }
+})
+
+app.post('/notifications/read', async(req, res) => {
+    const {notificationId} = req.body;
+    try{
+        await prisma.notification.update({
+            where: {id: notificationId},
+            data: {read: true}
+        });
+        res.status(200).json({message: 'Notification marked as read'})
+    }catch(error){
+        console.error('Error marking notification as read: ', error);
+        res.status(500).json({error: 'Failed to mark notifications as read.'})
+    }
+})
+
+
+
+//to send the notifcation every 12am
+cron.schedule('0 0 * * *', async() => {
+
+    try{
+        const users = await prisma.users.findMany();
+        for (const user of users){
+            await sendNotification(user.id)
+        }
+    }catch(error){
+        console.error('Error running scheduled notifications: ', error)
+    }
+})
+
+
+
+//upload a profile picture
 app.post('/upload-profile-picture', upload.single('profilePicture'), async (req, res) => {
     const { userId } = req.body;
 
@@ -76,6 +288,7 @@ app.post('/upload-profile-picture', upload.single('profilePicture'), async (req,
     }
 })
 
+//read the recipe of the day json file
 const readRecipeOfTheDay = () => {
     if (fs.existsSync(RECIPE_FILE_PATH)) {
         const data = fs.readFileSync(RECIPE_FILE_PATH, 'utf-8')
@@ -86,6 +299,7 @@ const readRecipeOfTheDay = () => {
 
 };
 
+//change the recipe of the day json file
 const writeRecipeOfTheDay = (recipe) => {
     const data = JSON.stringify(recipe, null, 2)
     fs.writeFileSync(RECIPE_FILE_PATH, data)
@@ -220,8 +434,51 @@ app.get('/login/:id', async (req, res) => {
     res.json(user)
 })
 
-//get recipes and the likes in the recipe
+const authenticateToken = (req, res, next) => {
+    const token = req.cookies.token;
+    if (!token){
+        return res.status(401).json("No token found, authroization denied");
+    }
+    try{
+        const decoded = jwt.verify(token, secretKey);
+        req.userId = decoded.id;
+        next();
+    }catch(error){
+        return res.status(401).json("Token is not valid")
+    }
+};
+
+app.use('/notifications', authenticateToken)
+
+//get recipes, the likes and healthScore of the recipe
 app.get('/recipes', async (req, res) => {
+    const token = req.cookies.token;
+    let userId;
+    let userPreferences = {
+        dietaryPreferences:[],
+        allergens: [],
+        dietTypes: []
+    }
+    if(token){
+            const decoded = jwt.verify(token, secretKey);
+            const userId = decoded.id;
+
+            const preferences = await prisma.userPreferences.findUnique({
+                where: {userId : parseInt(userId)}
+            })
+
+                const dietaryPreferences = preferences.dietaryPreferences;
+                const dietTypes = DIET_TYPES.filter(dietType => dietaryPreferences.includes(dietType));
+                const  allergens = dietaryPreferences.reduce((acc, preference) => {
+                const allergen = DIETARY_PREFERENCES_TO_ALLERGENS[preference];
+                    if (allergen){
+                        acc.push(allergen)
+                    }
+                    return acc;
+                }, [])
+                userPreferences = {...preferences, allergens, dietTypes}
+    }
+
     const category = req.query.category || '';
     const health = req.query.health || '';
     let url = `https://api.edamam.com/search?&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`;
@@ -252,17 +509,27 @@ app.get('/recipes', async (req, res) => {
             acc[like.recipeId] = like._count.recipeId;
             return acc;
         }, {})
-        data.hits.forEach(hit => {
-            hit.likes = likesMap[hit.recipe.uri] || 0;
-        });
 
-        return res.json(data.hits)
+        const recipesWithHealthScores = data.hits.map(hit => {
+            const recipe = hit.recipe;
+            const healthInfo =calculateHealthScore(recipe, userPreferences);
+
+            return {
+                ...recipe,
+                likes:likesMap[hit.recipe.uri] || 0,
+                healthScore : healthInfo ? healthInfo.score : 0,
+                healthColor : healthInfo ? healthInfo.color : 0
+            }
+        })
+
+        return res.json(recipesWithHealthScores)
     }
     catch (error) {
         res.status(500).json(error)
     }
 })
 
+// fetch a random recipe for the recipe of the day
 const fetchRandomRecipe = async () => {
     const categories = ['chicken', 'beef', 'fish', 'rice', 'cookies', 'cheese', 'salad', 'beans', 'stew', 'egg', 'fish', 'pork', 'lettuce', 'mango', 'yam', 'potatoes', 'turkey', 'tomatoes', 'spaghetti', 'pasta']
     const randomCategory = categories[Math.floor(Math.random() * categories.length)]
@@ -288,6 +555,7 @@ const fetchRandomRecipe = async () => {
     }
 }
 
+//get the recipe of the day
 app.get('/recipe-of-the-day', async (req, res) => {
     try {
         let recipeOfTheDay = await readRecipeOfTheDay();
@@ -325,6 +593,7 @@ app.post('/recipes/like', async (req, res) => {
     }
 })
 
+//to add a preference
 app.post('/save-preferences', async (req, res) => {
     const { userId, cookingLevel, dietaryPreferences = [], favoriteFoods = [] } = req.body;
     try {
@@ -343,6 +612,7 @@ app.post('/save-preferences', async (req, res) => {
     }
 });
 
+//to update a preference
 app.put('/update-preferences', async (req, res) => {
     const { userId, cookingLevel, dietaryPreferences = [], favoriteFoods = [] } = req.body;
     try {
@@ -367,6 +637,7 @@ app.put('/update-preferences', async (req, res) => {
     }
 })
 
+//to get a particular user's preferences
 app.get('/preferences/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
@@ -375,7 +646,39 @@ app.get('/preferences/:userId', async (req, res) => {
                 userId: parseInt(userId)
             }
         })
-        res.status(200).json(preferences || { cookingLevel: '', dietaryPreferences: [], favoriteFoods: [] })
+        if(!preferences){
+            return res.status(200).json({
+                cookingLevel: '',
+                dietaryPreferences: [],
+                favoriteFoods: [],
+                allergens: [],
+                dietTypes: []
+            })
+        }
+
+        const dietaryPreferences = preferences.dietaryPreferences || []
+
+        const allergens = dietaryPreferences.reduce((acc, preference) => {
+            const allergen = DIETARY_PREFERENCES_TO_ALLERGENS[preference];
+            if(allergen){
+                acc.push(allergen)
+            }
+            return acc
+        } , [])
+        const dietTypes = DIET_TYPES.filter(dietType => dietaryPreferences.includes(dietType));
+        if(dietTypes.length === 0){
+            dietTypes.push('Default')
+        }
+
+        const response = {
+            cookingLevel: preferences.cookingLevel || '',
+            dietaryPreferences: preferences.dietaryPreferences || [],
+            favoriteFoods : preferences.favoriteFoods || [],
+            allergens,
+            dietTypes
+        }
+
+        res.status(200).json(response)
     } catch (error) {
         console.error('Error fetching user preferences: ', error)
         res.status(500).json({ error: 'Failed to fetch user preferences' })
@@ -534,6 +837,7 @@ app.delete('/grocery/:id', async (req, res) => {
     }
 })
 
+//to get recipes using an ingredient
 app.post('/recommendations', async (req, res) => {
     const { ingredients } = req.body;
     try {
@@ -555,6 +859,7 @@ app.post('/recommendations', async (req, res) => {
     }
 })
 
+//to rate a recipe
 app.post('/recipes/rate', async (req, res) => {
     const { userId, recipeId, rating } = req.body;
     try {
@@ -592,6 +897,7 @@ app.post('/recipes/rate', async (req, res) => {
     }
 });
 
+//to get the ratings of a recipe
 app.get('/recipes/:recipeId/ratings', async (req, res) => {
     const { recipeId } = req.params;
     try {
@@ -606,6 +912,7 @@ app.get('/recipes/:recipeId/ratings', async (req, res) => {
     }
 })
 
+//to get the ratings from a user
 app.get('/recipes/:recipeId/user-rating', async (req, res) => {
     const { recipeId } = req.params;
     const { userId } = req.query;
@@ -622,6 +929,7 @@ app.get('/recipes/:recipeId/user-rating', async (req, res) => {
     }
 })
 
+//to add to the weekly meal planner
 app.post('/meal-planner/add', async(req, res) => {
     const {userId, day, mealType, recipeId, recipeName, recipeImage, recipeUrl} = req.body;
     try{
@@ -644,6 +952,7 @@ app.post('/meal-planner/add', async(req, res) => {
                     recipeUrl
                 }
             });
+            io.to(userId.toString()).emit('updateHealthScores');
         }
         res.status(200).json(mealPlannerEntry);
     }catch(error){
@@ -670,9 +979,14 @@ app.get('/meal-planner/:userId', async(req, res) => {
 app.delete('/meal-planner/:id', async(req, res) => {
     const {id} = req.params;
     try{
-        await prisma.mealPlanner.delete({
+
+        const mealEntry = await prisma.mealPlanner.findUnique({
+            where: {id : parseInt(id)}
+        })
+        const mealPlannerEntry = await prisma.mealPlanner.delete({
             where: {id : parseInt(id)}
         });
+        io.to(mealEntry.userId.toString()).emit('updateHealthScores')
         res.status(200).json({message: 'Meal plan deleted successfully'})
     }catch(error){
         console.error('Error deleting meal plan:', error)
@@ -680,6 +994,84 @@ app.delete('/meal-planner/:id', async(req, res) => {
 }
 });
 
-app.listen(PORT, () => {
+app.get('/meal-planner-health-scores', async(req, res) => {
+    const token = req.cookies.token;
+    if(!token){
+        return res.status(401).json({message: "Unauthorized"});
+    }
+    let userId;
+    try{
+        const decoded = jwt.verify(token, secretKey);
+        userId = decoded.id;
+    }catch(error){
+        return res.status(401).json({message: 'Invalid token'})
+    }
+
+    try{
+        const weeklyPlanner = await prisma.mealPlanner.findMany({
+            where: {userId: parseInt(userId)}
+        });
+        const recipeIds = weeklyPlanner.map(entry => entry.recipeId);
+
+        const fetchRecipeData = async(id) => {
+            const response = await fetch(`https://api.edamam.com/search?r=${encodeURIComponent(id)}&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`);
+            if(response.status === 429){
+                throw Error('RATE_LIMIT_EXCEEDED')
+            }
+            const data = await response.json();
+            return data[0]
+        };
+
+        const recipes = await Promise.all(recipeIds.map(id => fetchRecipeData(id)));
+        const healthScores = recipes.map(recipe => {
+            const healthInfo = calculateHealthScore(recipe, {});
+            return{
+                recipeId: recipe.uri,
+                recipeName: recipe.label,
+                recipeImage: recipe.image,
+                healthScore: healthInfo.score,
+                healthColor: healthInfo.color
+            };
+        });
+        res.json(healthScores)
+    }catch(error){
+        if(error.message === 'RATE_LIMIT_EXCEEDED'){
+            res.status(429).json({error: 'Rate limit exceeded. Please wait for 2 minutes and try again.'})
+        }
+    }
+})
+
+const fetchUserHealthScores = async(userId) => {
+    try{
+        const weeklyPlanner = await prisma.mealPlanner.findMany({
+            where: {userId: parseInt(userId)}
+        });
+        const recipeIds = weeklyPlanner.map(entry => entry.recipeId);
+
+        const fetchRecipeData = async(id) => {
+            const response = await fetch(`https://api.edamam.com/search?r=${encodeURIComponent(id)}&app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}`);
+            const data = await response.json();
+            return data[0]
+
+        };
+        const recipes  = await Promise.all(recipeIds.map(id => fetchRecipeData(id)));
+        const healthScores = recipes.map(recipe => {
+            const healthInfo = calculateHealthScore(recipe, {});
+            return{
+                recipeId: recipe.uri,
+                recipeName: recipe.label,
+                recipeImage: recipe.image,
+                healthScore: healthInfo.score,
+                healthColor: healthInfo.color
+            };
+        });
+        return healthScores
+    }catch(error){
+        console.error('Error fetching nutrient data: ', error);
+        res.status(500).json({error: 'Failed to fetch nutrient data.'})
+    }
+}
+
+server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
 })
