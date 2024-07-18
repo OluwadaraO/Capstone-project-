@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
 import RecipeOfTheDay from "./RecipeOfTheDay";
 import MealPlannerModal from "./MealPlannerModal";
+import RateLimitModal from "./RateLimitModal";
 function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logOut } = useAuth();
@@ -43,6 +44,7 @@ function HomePage() {
   const [userRatings, setUserRatings] = useState({});
   const [selectedRecipe, setSelectedrecipe] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRateLimitModalOpen, setRateLimitModalOpen] = useState(false);
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   useEffect(() => {
@@ -50,7 +52,8 @@ function HomePage() {
       const fetchSavedRecipes = async () => {
         try {
           const response = await fetch(
-            `${backendAddress}/recipes/save/${user.id}`
+            `${backendAddress}/recipes/save/${user.id}`,
+            {credentials: 'include'}
           );
           const data = await response.json();
 
@@ -69,7 +72,8 @@ function HomePage() {
       const fetchLikedRecipes = async () => {
         try {
           const response = await fetch(
-            `${backendAddress}/recipes/liked/${user.id}`
+            `${backendAddress}/recipes/liked/${user.id}`,
+            {credentials: 'include'}
           );
           const data = await response.json();
           if (Array.isArray(data)) {
@@ -116,34 +120,43 @@ function HomePage() {
       url += `${filtersParam}`;
     }
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        credentials: 'include',
+      });
+      if (response.status === 429){
+        setRateLimitModalOpen(true);
+        setTimeout(() => setRateLimitModalOpen(false), 120000)
+      }
       const data = await response.json();
 
       if (!Array.isArray(data)) {
-        throw new Error("Expected data to be an array");
+        setRateLimitModalOpen(true);
+        setTimeout(() => setRateLimitModalOpen(false), 120000)
       }
       for (let recipe of data) {
-        const encodedRecipeId = encodeURIComponent(recipe.recipe.uri);
+        const encodedRecipeId = encodeURIComponent(recipe.uri);
         const ratingsResponse = await fetch(
-          `${backendAddress}/recipes/${encodedRecipeId}/ratings`
+          `${backendAddress}/recipes/${encodedRecipeId}/ratings`,
+          {credentials: 'include'}
         );
         const ratingsData = await ratingsResponse.json();
         setRecipeRatings((prev) => ({
           ...prev,
-          [recipe.recipe.uri]: {
+          [recipe.uri]: {
             ratings: ratingsData.ratings,
             averageRating: ratingsData.averageRating,
           },
         }));
         if (isAuthenticated) {
           const userRatingResponse = await fetch(
-            `${backendAddress}/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`
+            `${backendAddress}/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`,
+            {credentials: 'include'}
           );
           const userRatingData = await userRatingResponse.json();
 
           setUserRatings((prev) => ({
             ...prev,
-            [recipe.recipe.uri]: userRatingData.rating || 0,
+            [recipe.uri]: userRatingData.rating || 0,
           }));
         }
       }
@@ -210,15 +223,16 @@ function HomePage() {
   };
 
   const handleLike = async (recipe) => {
-    const recipeId = recipe.recipe.uri;
+    const recipeId = recipe.uri;
     if (likedRecipes.some((liked) => liked.recipeId === recipeId)) {
       await fetch(`${backendAddress}/recipes/unlike`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
-          recipeId: recipe.recipe.uri,
+          recipeId: recipe.uri,
         }),
+        credentials: 'include',
       });
       setLikedRecipes(
         likedRecipes.filter((liked) => liked.recipeId !== recipeId)
@@ -230,10 +244,11 @@ function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
-          recipeId: recipe.recipe.uri,
-          recipeName: recipe.recipe.label,
-          recipeImage: recipe.recipe.image,
+          recipeId: recipe.uri,
+          recipeName: recipe.label,
+          recipeImage: recipe.image,
         }),
+        credentials: 'include',
       });
       const likedRecipe = await response.json();
       setLikedRecipes([...likedRecipes, likedRecipe]);
@@ -244,7 +259,7 @@ function HomePage() {
   const updateRecipeLikes = (recipeId, change) => {
     const updateLikes = (recipesList) => {
       return recipesList.map((recipe) => {
-        if (recipe.recipe.uri === recipeId) {
+        if (recipe.uri === recipeId) {
           return {
             ...recipe,
             likes: (recipe.likes || 0) + change,
@@ -264,17 +279,18 @@ function HomePage() {
   };
 
   const handleSave = async (recipe) => {
-    if (savedRecipes.some((saved) => saved.recipeId === recipe.recipe.uri)) {
+    if (savedRecipes.some((saved) => saved.recipeId === recipe.uri)) {
       await fetch(`${backendAddress}/recipes/unsaved`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
-          recipeId: recipe.recipe.uri,
+          recipeId: recipe.uri,
         }),
+        credentials: 'include',
       });
       setSavedRecipes(
-        savedRecipes.filter((saved) => saved.recipeId !== recipe.recipe.uri)
+        savedRecipes.filter((saved) => saved.recipeId !== recipe.uri)
       );
     } else {
       const response = await fetch(`${backendAddress}/recipes/saved`, {
@@ -282,10 +298,11 @@ function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
-          recipeId: recipe.recipe.uri,
-          recipeName: recipe.recipe.label,
-          recipeImage: recipe.recipe.image,
+          recipeId: recipe.uri,
+          recipeName: recipe.label,
+          recipeImage: recipe.image,
         }),
+        credentials: 'include',
       });
       const savedRecipe = await response.json();
       setSavedRecipes([...savedRecipes, savedRecipe]);
@@ -306,6 +323,7 @@ function HomePage() {
           recipeId,
           rating,
         }),
+        credentials: 'include',
       });
       const data = await response.json();
 
@@ -337,6 +355,7 @@ function HomePage() {
           recipeImage: recipe.image,
           recipeUrl: recipe.url,
         }),
+        credentials: 'include',
       });
       if(response.ok){
         alert(`Added ${recipe.label} to ${day}`);
@@ -414,6 +433,20 @@ function HomePage() {
           <button id="LogOutButton" onClick={LogOut}>
             Log Out
           </button>
+          <div>
+          <Link to="/notifications">
+          <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" viewBox="0 0 611.999 611.999" xmlSpace="preserve">
+          <g>
+          <g>
+            <g>
+              <path d="M570.107,500.254c-65.037-29.371-67.511-155.441-67.559-158.622v-84.578c0-81.402-49.742-151.399-120.427-181.203     C381.969,34,347.883,0,306.001,0c-41.883,0-75.968,34.002-76.121,75.849c-70.682,29.804-120.425,99.801-120.425,181.203v84.578     c-0.046,3.181-2.522,129.251-67.561,158.622c-7.409,3.347-11.481,11.412-9.768,19.36c1.711,7.949,8.74,13.626,16.871,13.626     h164.88c3.38,18.594,12.172,35.892,25.619,49.903c17.86,18.608,41.479,28.856,66.502,28.856     c25.025,0,48.644-10.248,66.502-28.856c13.449-14.012,22.241-31.311,25.619-49.903h164.88c8.131,0,15.159-5.676,16.872-13.626     C581.586,511.664,577.516,503.6,570.107,500.254z M484.434,439.859c6.837,20.728,16.518,41.544,30.246,58.866H97.32     c13.726-17.32,23.407-38.135,30.244-58.866H484.434z M306.001,34.515c18.945,0,34.963,12.73,39.975,30.082     c-12.912-2.678-26.282-4.09-39.975-4.09s-27.063,1.411-39.975,4.09C271.039,47.246,287.057,34.515,306.001,34.515z      M143.97,341.736v-84.685c0-89.343,72.686-162.029,162.031-162.029s162.031,72.686,162.031,162.029v84.826     c0.023,2.596,0.427,29.879,7.303,63.465H136.663C143.543,371.724,143.949,344.393,143.97,341.736z M306.001,577.485     c-26.341,0-49.33-18.992-56.709-44.246h113.416C355.329,558.493,332.344,577.485,306.001,577.485z"/>
+              <path d="M306.001,119.235c-74.25,0-134.657,60.405-134.657,134.654c0,9.531,7.727,17.258,17.258,17.258     c9.531,0,17.258-7.727,17.258-17.258c0-55.217,44.923-100.139,100.142-100.139c9.531,0,17.258-7.727,17.258-17.258     C323.259,126.96,315.532,119.235,306.001,119.235z"/>
+            </g>
+          </g>
+        </g>
+        </svg>
+        </Link>
+          </div>
         </div>
       ) : (
         <div className="user-authentication">
@@ -425,6 +458,7 @@ function HomePage() {
           </button>
         </div>
       )}
+      <RateLimitModal isOpen={isRateLimitModalOpen} onClose={() => setRateLimitModalOpen(false)}/>
       <div className="search-form">
         <input
           type="text"
@@ -493,18 +527,19 @@ function HomePage() {
         <div className="search-results">
           {searchResults.map((result, index) => (
             <div key={index} className="recipe-card">
-              <img src={result.recipe.image} alt={result.recipe.label} />
-              <h3>{result.recipe.label}</h3>
-              <p>Calories: {Math.round(result.recipe.calories)}</p>
-              <p>{result.recipe.totalTime}</p>
+
+              <img src={result.image} alt={result.label} />
+              <h3>{result.label}</h3>
+              <p>Calories: {Math.round(result.calories)}</p>
+              <p>{result.totalTime}</p>
               <StarRating
-                rating={userRatings[result.recipe.uri] || 0}
+                rating={userRatings[result.uri] || 0}
                 averageRating={
-                  recipeRatings[result.recipe.uri]
-                    ? recipeRatings[result.recipe.uri].averageRating
+                  recipeRatings[result.uri]
+                    ? recipeRatings[result.uri].averageRating
                     : 0
                 }
-                onRate={(rating) => handleRateRecipe(result.recipe.uri, rating)}
+                onRate={(rating) => handleRateRecipe(result.uri, rating)}
               />
               <button
                 onClick={(e) => {
@@ -512,24 +547,31 @@ function HomePage() {
                   handleLike(result);
                 }}
               >
-                {isRecipeLiked(result.recipe.uri) ? "Unlike" : "Like"}
+                {isRecipeLiked(result.uri) ? "Unlike" : "Like"}
               </button>
               <p>Likes: {result.likes || 0}</p>
+              {result.healthScore && (
+                <p>Health Score : {" "}
+                <span style={{color: result.healthColor}}>
+                  {Math.round(result.healthScore)} %
+                </span>
+                </p>
+              )}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSave(result);
                 }}
               >
-                {isRecipeSaved(result.recipe.uri)
+                {isRecipeSaved(result.uri)
                   ? "Added to Saved"
                   : "Add to Saved"}
               </button>
-              <button onClick={() => {setSelectedrecipe(result.recipe); setIsModalOpen(true); }}>
+              <button onClick={() => {setSelectedrecipe(result); setIsModalOpen(true); }}>
                 +
               </button>
               <a
-                href={result.recipe.url}
+                href={result.url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -560,29 +602,29 @@ function HomePage() {
                         onClick={handleRecipeCardClick}
                       >
                         <img
-                          src={recipeData.recipe.image}
-                          alt={recipeData.recipe.label}
+                          src={recipeData.image}
+                          alt={recipeData.label}
                           onClick={handleHomePageClick}
                         />
                         <h3 onClick={handleHomePageClick}>
-                          {recipeData.recipe.label}{" "}
+                          {recipeData.label}{" "}
                         </h3>
                         <p onClick={handleHomePageClick}>
-                          Calories: {Math.round(recipeData.recipe.calories)}
+                          Calories: {Math.round(recipeData.calories)}
                         </p>
                         <p onClick={handleHomePageClick}>
-                          {recipeData.totalTime}
+                          Total Time : {recipeData.totalTime}
                         </p>
                         <StarRating
-                          rating={userRatings[recipeData.recipe.uri] || 0}
+                          rating={userRatings[recipeData.uri] || 0}
                           averageRating={
-                            recipeRatings[recipeData.recipe.uri]
-                              ? recipeRatings[recipeData.recipe.uri]
+                            recipeRatings[recipeData.uri]
+                              ? recipeRatings[recipeData.uri]
                                   .averageRating
                               : 0
                           }
                           onRate={(rating) =>
-                            handleRateRecipe(recipeData.recipe.uri, rating)
+                            handleRateRecipe(recipeData.uri, rating)
                           }
                         />
                         <button
@@ -591,26 +633,33 @@ function HomePage() {
                             handleLike(recipeData);
                           }}
                         >
-                          {isRecipeLiked(recipeData.recipe.uri)
+                          {isRecipeLiked(recipeData.uri)
                             ? "Unlike"
                             : "Like"}
                         </button>
                         <p>Likes: {recipeData.likes}</p>
+                        {recipeData.healthScore && (
+                          <p>Health Score : {" "}
+                            <span style={{color: recipeData.healthColor}}>
+                              {Math.round(recipeData.healthScore)} %
+                            </span>
+                          </p>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSave(recipeData);
                           }}
                         >
-                          {isRecipeSaved(recipeData.recipe.uri)
+                          {isRecipeSaved(recipeData.uri)
                             ? "Added to Saved"
                             : "Add to Saved"}
                         </button>
-                        <button onClick={() => {setSelectedrecipe(recipeData.recipe); setIsModalOpen(true)}}>
+                        <button onClick={() => {setSelectedrecipe(recipeData); setIsModalOpen(true)}}>
                             +
                         </button>
                         <a
-                          href={recipeData.recipe.url}
+                          href={recipeData.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={handleHomePageClick}

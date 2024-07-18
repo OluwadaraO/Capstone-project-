@@ -7,10 +7,13 @@ function SavedRecipes() {
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   const fetchSavedRecipes = async () => {
-    const response = await fetch(`${backendAddress}/recipes/save/${user.id}`);
+    const response = await fetch(`${backendAddress}/recipes/save/${user.id}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
     const data = await response.json();
     setSavedRecipe(data);
-    
+
   };
 
   useEffect(() => {

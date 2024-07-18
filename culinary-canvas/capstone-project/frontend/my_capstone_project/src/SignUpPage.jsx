@@ -46,7 +46,7 @@ function Sign_Up_Page() {
         return;
       } else if (response.ok) {
         const data = await response.json()
-        alert("Registration successful!");
+        alert("Registration successful! ");
         login(data.newUserAccount)
         navigate("/preferences");
       } else {
@@ -54,7 +54,7 @@ function Sign_Up_Page() {
         setError(data.message);
         alert(
           data.message ||
-            "Oops! This username already exists. Please try another username"
+            "Oops! This username already exists. Please try another."
         );
       }
     } catch (error) {
