@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import StarRating from "./StarRating";
 import RecipeOfTheDay from "./RecipeOfTheDay";
 import MealPlannerModal from "./MealPlannerModal";
+import RateLimitModal from "./RateLimitModal";
 function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logOut } = useAuth();
@@ -43,6 +44,7 @@ function HomePage() {
   const [userRatings, setUserRatings] = useState({});
   const [selectedRecipe, setSelectedrecipe] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRateLimitModalOpen, setRateLimitModalOpen] = useState(false);
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 
   useEffect(() => {
@@ -121,10 +123,15 @@ function HomePage() {
       const response = await fetch(url, {
         credentials: 'include',
       });
+      if (response.status === 429){
+        setRateLimitModalOpen(true);
+        setTimeout(() => setRateLimitModalOpen(false), 120000)
+      }
       const data = await response.json();
 
       if (!Array.isArray(data)) {
-        throw new Error("Expected data to be an array");
+        setRateLimitModalOpen(true);
+        setTimeout(() => setRateLimitModalOpen(false), 120000)
       }
       for (let recipe of data) {
         const encodedRecipeId = encodeURIComponent(recipe.uri);
@@ -451,6 +458,7 @@ function HomePage() {
           </button>
         </div>
       )}
+      <RateLimitModal isOpen={isRateLimitModalOpen} onClose={() => setRateLimitModalOpen(false)}/>
       <div className="search-form">
         <input
           type="text"
@@ -519,6 +527,7 @@ function HomePage() {
         <div className="search-results">
           {searchResults.map((result, index) => (
             <div key={index} className="recipe-card">
+
               <img src={result.image} alt={result.label} />
               <h3>{result.label}</h3>
               <p>Calories: {Math.round(result.calories)}</p>
@@ -544,7 +553,7 @@ function HomePage() {
               {result.healthScore && (
                 <p>Health Score : {" "}
                 <span style={{color: result.healthColor}}>
-                  {Math.round(result.healthScore)}
+                  {Math.round(result.healthScore)} %
                 </span>
                 </p>
               )}
@@ -632,7 +641,7 @@ function HomePage() {
                         {recipeData.healthScore && (
                           <p>Health Score : {" "}
                             <span style={{color: recipeData.healthColor}}>
-                              {Math.round(recipeData.healthScore)}
+                              {Math.round(recipeData.healthScore)} %
                             </span>
                           </p>
                         )}
