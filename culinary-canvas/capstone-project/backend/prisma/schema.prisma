@@ -25,6 +25,30 @@ model Users{
   ratings Rating[]
   userPreferences UserPreferences?
   mealPlanners MealPlanner[]
+  notifications Notification[]
+  subscriptions NotificationSubscription?
+}
+
+model Notification{
+  id Int @id @default(autoincrement())
+  userId Int
+  subject String
+  message String
+  recipes Json
+  read Boolean @default(false)
+  createdAt DateTime @default(now())
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
+}
+
+model NotificationSubscription{
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  endpoint String
+  p256dh String
+  auth String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user Users @relation(fields: [userId], references:[id], onDelete: Cascade)
 }
 
 model MealPlanner{
