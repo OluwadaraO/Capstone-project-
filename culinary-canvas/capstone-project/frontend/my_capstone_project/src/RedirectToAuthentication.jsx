@@ -4,6 +4,7 @@ const RedirectToAuthentication = createContext();
 export const AuthorizationContext = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const backendAddress =import.meta.env.VITE_BACKEND_ADDRESS
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export const AuthorizationContext = ({ children }) => {
   const login = (userData) => {
     setIsAuthenticated(true);
     setUser(userData);
+    setShowNotificationModal(true)
   };
 
   const logOut = async () => {
@@ -53,7 +55,7 @@ export const AuthorizationContext = ({ children }) => {
 
   return (
     <RedirectToAuthentication.Provider
-      value={{ isAuthenticated, user, logOut, login }}
+      value={{ isAuthenticated, user, logOut, login, showNotificationModal, setShowNotificationModal }}
     >
       {children}
     </RedirectToAuthentication.Provider>
