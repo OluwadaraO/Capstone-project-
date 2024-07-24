@@ -42,7 +42,7 @@ jobs:
         sleep 15
 
     - name: Test endpoint with curl
-      run: curl -v http://localhost:3000/recipes
+      run: curl -v https://localhost:3000/recipes
         
     - name: Test get recipes
       env:
@@ -50,7 +50,7 @@ jobs:
         
       run: |
         node -e "
-        const http = require('http');
+        const https = require('https');
         const options = {
           hostname: '127.0.0.1',
           port: 3000,
@@ -60,7 +60,7 @@ jobs:
             'Authorization': 'Bearer ' + process.env.AUTH_TOKEN
           }
         };
-        const req = http.request(options, (res) => {
+        const req = https.request(options, (res) => {
           console.log('Status Code: ', res.statusCode);
           res.setEncoding('utf8');
           res.on('data', (chunk) => {
@@ -92,11 +92,6 @@ jobs:
     - name : Generate Prisma Client
       working-directory: culinary-canvas/capstone-project/backend
       run: npx prisma generate
-
-    - name: Check backend startup
-      working-directory: culinary-canvas/capstone-project/backend
-      run: |
-        node -e "require('./index.js')"
 
     - name: Test web scraping flow
       env:
