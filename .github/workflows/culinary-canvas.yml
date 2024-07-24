@@ -40,9 +40,6 @@ jobs:
         node index.js &
         echo $! > backend_pid.txt
         sleep 15
-
-    - name: Test endpoint with curl
-      run: curl -v http://localhost:3000/recipes
         
     - name: Test get recipes
       env:
