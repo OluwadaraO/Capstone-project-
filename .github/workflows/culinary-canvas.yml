@@ -18,31 +18,6 @@ jobs:
       with:
         node-version: '14'
         
-    - name : Check installed packages
-      working-directory: culinary-canvas/capstone-project/backend
-      run: npm list @prisma/client
-
-    - name : Install Prisma Client
-      working-directory: ./capstone-project/backend
-      run: npm install @prisma/client
-      
-    - name : Generate Prisma Client
-      working-directory: ./capstone-project/backend
-      run: npx prisma generate
-      
-    - name: Install backend dependencies
-      working-directory: ./capstone-project/backend
-      run: npm ci
-
-    - name: Install frontend dependencies
-      working-directory: ./capstone-project/frontend/capstone-project
-      run: npm ci
-
-    - name: Check backend startup
-      working-directory: ./capstone-project/backend
-      run: |
-        node -e "require('./index.js')"
-
     - name: Test get recipes
       env:
         AUTH_TOKEN: ${{secrets.AUTH_TOKEN}}
@@ -72,6 +47,31 @@ jobs:
           process.exit(1);
         });
         req.end();"
+
+    - name : Check installed packages
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npm list @prisma/client
+
+    - name : Install Prisma Client
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npm install @prisma/client
+      
+    - name : Generate Prisma Client
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npx prisma generate
+      
+    - name: Install backend dependencies
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npm ci
+
+    - name: Install frontend dependencies
+      working-directory: ./capstone-project/frontend/capstone-project
+      run: npm ci
+
+    - name: Check backend startup
+      working-directory: ./capstone-project/backend
+      run: |
+        node -e "require('./index.js')"
 
     - name: Test web scraping flow
       env:
