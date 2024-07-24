@@ -24,7 +24,7 @@ jobs:
         
       run: |
         node -e "
-        const https = require('https);
+        const https = require('https');
         const options = {
           hostname: 'localhost',
           port: 3000,
