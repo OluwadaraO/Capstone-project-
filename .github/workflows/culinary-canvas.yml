@@ -18,13 +18,22 @@ jobs:
       with:
         node-version: '14'
         
+    - name: Display package.json
+      working-directory: culinary-canvas/capstone-project/backend
+      run: cat package.json
+
+    - name: Generate Prisma Client
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npx prisma generate
+      
     - name: Install backend dependencies
       working-directory: culinary-canvas/capstone-project/backend
-      run: npm ci
+      run: npm install
 
     - name: Install frontend dependencies
       working-directory: culinary-canvas/capstone-project/frontend/capstone-project
       run: npm ci
+      
     - name: Start backend server
       working-directory: culinary-canvas/capstone-project/backend
       run: |
