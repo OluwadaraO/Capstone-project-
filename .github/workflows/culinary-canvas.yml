@@ -102,7 +102,9 @@ jobs:
       run: npm run build
 
     - name: Start backend server
-      working-directory: ./backend
+      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
       run: |
+        pwd
+        ls -la
         node index.js &
-        sleep 10
+        echo $! > backend_pid.txt
