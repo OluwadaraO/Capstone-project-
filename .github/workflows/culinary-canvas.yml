@@ -125,5 +125,5 @@ jobs:
         req.end();"
 
     - name: Build frontend
-      working-directory: ./capstone-project/frontend/my_capstone_project
+      working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: npm run build
