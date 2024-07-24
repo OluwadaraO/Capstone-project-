@@ -9,6 +9,7 @@ import { AuthorizationContext } from "./RedirectToAuthentication";
 import FindRecipes from "./FindRecipes";
 import UserRecommendation from "./UserRecommendation";
 import Notification from "./Notification";
+import ScrapedRecipes from "./ScrapedRecipes";
 function App() {
   return (
     <AuthorizationContext>
@@ -21,6 +22,7 @@ function App() {
             <Route path="/find-recipes" element={<FindRecipes />} />
             <Route path="/preferences" element={<UserRecommendation/>}/>
             <Route path="/notifications" element={<Notification/>}/>
+            <Route path="/imported-recipes" element={<ScrapedRecipes/>}/>
           </Routes>
       </Router>
     </AuthorizationContext>
