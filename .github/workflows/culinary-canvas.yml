@@ -19,15 +19,15 @@ jobs:
         node-version: '14'
 
     - name: Install backend dependencies
-      working-directory: ./backend
+      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
       run: npm ci
 
     - name: Install frontend dependencies
-      working-directory: ./frontend/capstone-project
+      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/frontend/capstone-project
       run: npm ci
 
     - name: Check backend startup
-      working-directory: ./backend
+      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
       run: |
         node -e "require('./index.js')"
 
@@ -98,7 +98,7 @@ jobs:
         req.end();"
 
     - name: Build frontend
-      working-directory: ./frontend/capstone-project
+      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/frontend/capstone-project
       run: npm run build
 
     - name: Start backend server
