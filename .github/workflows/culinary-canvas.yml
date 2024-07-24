@@ -19,27 +19,27 @@ jobs:
         node-version: '14'
         
     - name : Check installed packages
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
+      working-directory: culinary-canvas/capstone-project/backend
       run: npm list @prisma/client
 
     - name : Install Prisma Client
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
+      working-directory: culinary-canvas/capstone-project/backend
       run: npm install @prisma/client
       
     - name : Generate Prisma Client
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
+      working-directory: culinary-canvas/capstone-project/backend
       run: npx prisma generate
       
     - name: Install backend dependencies
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
+      working-directory: culinary-canvas/capstone-project/backend
       run: npm ci
 
     - name: Install frontend dependencies
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/frontend/capstone-project
+      working-directory: culinary-canvas/capstone-project/frontend/capstone-project
       run: npm ci
 
     - name: Check backend startup
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
+      working-directory: culinary-canvas/capstone-project/backend
       run: |
         node -e "require('./index.js')"
 
@@ -110,11 +110,11 @@ jobs:
         req.end();"
 
     - name: Build frontend
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/frontend/capstone-project
+      working-directory: culinary-canvas/capstone-project/frontend/capstone-project
       run: npm run build
 
     - name: Start backend server
-      working-directory: ${{github.workspace}}/culinary-canvas/capstone-project/backend
+      working-directory: culinary-canvas/capstone-project/backend
       run: |
         pwd
         ls -la
