@@ -40,7 +40,7 @@ jobs:
             process.exit(0)
           } else{
             console.log('Backend is not running correctly. Status: ', res.statusCode);
-          }
+          };
         });
         req.on('error', (error) => {
           console.error('Error: ', error);
