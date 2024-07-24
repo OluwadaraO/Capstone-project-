@@ -42,7 +42,7 @@ jobs:
         sleep 15
 
     - name: Test endpoint with curl
-      run: curl -v https://localhost:3000/recipes
+      run: curl -v http://localhost:3000/recipes
         
     - name: Test get recipes
       env:
@@ -50,7 +50,7 @@ jobs:
         
       run: |
         node -e "
-        const https = require('https');
+        const http = require('http');
         const options = {
           hostname: '127.0.0.1',
           port: 3000,
@@ -60,7 +60,7 @@ jobs:
             'Authorization': 'Bearer ' + process.env.AUTH_TOKEN
           }
         };
-        const req = https.request(options, (res) => {
+        const req = http.request(options, (res) => {
           console.log('Status Code: ', res.statusCode);
           res.setEncoding('utf8');
           res.on('data', (chunk) => {
@@ -99,7 +99,7 @@ jobs:
         USER_ID: ${{secrets.USER_ID}}
       run : |
         node -e "
-        const https = require('https');
+        const http = require('http');
         const options = {
           hostname : 'localhost',
           port: 3000,
@@ -109,7 +109,7 @@ jobs:
             'Content-Type' : 'application/json'
           }
         };
-        const req = https.request(options, (res) => {
+        const req = http.request(options, (res) => {
         if (res.statusCode === 200){
           console.log('Web scraping flow is working correctly');
           process.exit(0);
