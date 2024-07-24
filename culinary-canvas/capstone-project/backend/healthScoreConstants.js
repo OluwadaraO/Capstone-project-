@@ -19,4 +19,14 @@ const DIETARY_PREFERENCES_TO_ALLERGENS = {
     "Sesame-Free" : 'Sesame',
     "Mustard-Free" : "Mustard"
 }
-module.exports = {ALLERGENS, DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS}
+
+const NUTRIENT_CONSTANTS = {
+    "calories": 2000,
+    "protein" : 90,
+    "fat": 70,
+    "carbs" : 310,
+    "fiber" : 5,
+    "sugar" : 5,
+    "sodium" : 200
+}
+module.exports = {ALLERGENS, DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS, NUTRIENT_CONSTANTS}

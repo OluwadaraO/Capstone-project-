@@ -19,3 +19,7 @@
     width: 300px;
     text-align: center;
 }
+
+.submit-button :disabled{
+    background-color: #cccccc;
+}
