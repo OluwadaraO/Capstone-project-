@@ -1,4 +1,3 @@
-
 import "./SignUpPage.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +6,7 @@ import { useAuth } from "./RedirectToAuthentication";
 function Sign_Up_Page() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const {login, setUser} = useAuth()
+  const { login, setUser } = useAuth();
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -45,9 +44,9 @@ function Sign_Up_Page() {
         alert("Password is empty. Please try again");
         return;
       } else if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         alert("Registration successful! ");
-        login(data.newUserAccount)
+        login(data.newUserAccount);
         navigate("/preferences");
       } else {
         const data = await response.json();

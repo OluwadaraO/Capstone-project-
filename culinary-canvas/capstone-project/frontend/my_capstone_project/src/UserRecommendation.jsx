@@ -41,7 +41,7 @@ function UserRecommendation() {
     "Alcohol-Free",
     "Sulfite-Free",
     "Kosher",
-    "Immuno-Supportive"
+    "Immuno-Supportive",
   ];
   const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 

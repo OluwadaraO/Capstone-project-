@@ -9,9 +9,10 @@ import StarRating from "./StarRating";
 import RecipeOfTheDay from "./RecipeOfTheDay";
 import MealPlannerModal from "./MealPlannerModal";
 import RateLimitModal from "./RateLimitModal";
+import NotificationModal from "./NotificationModal";
 function HomePage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user, logOut } = useAuth();
+  const { isAuthenticated, user, logOut, showNotificationModal, setShowNotificationModal  } = useAuth();
   //state to store recipies for each query
   const [recipes, setRecipes] = useState({});
   //array of queries to fetch different categories of recipies
@@ -459,6 +460,9 @@ function HomePage() {
         </div>
       )}
       <RateLimitModal isOpen={isRateLimitModalOpen} onClose={() => setRateLimitModalOpen(false)}/>
+      {user && showNotificationModal && (
+        <NotificationModal userId = {user.id} onClose={() => setShowNotificationModal(false)}/>
+      )}
       <div className="search-form">
         <input
           type="text"
