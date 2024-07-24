@@ -31,7 +31,7 @@ jobs:
       run: npm install
 
     - name: Install frontend dependencies
-      working-directory: culinary-canvas/capstone-project/frontend/capstone-project
+      working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: npm ci
       
     - name: Start backend server
@@ -125,5 +125,5 @@ jobs:
         req.end();"
 
     - name: Build frontend
-      working-directory: ./capstone-project/frontend/capstone-project
+      working-directory: ./capstone-project/frontend/my_capstone_project
       run: npm run build
