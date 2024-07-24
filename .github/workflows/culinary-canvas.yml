@@ -17,6 +17,13 @@ jobs:
       uses: actions/setup-node@v4.0.3
       with:
         node-version: '14'
+
+    - name: Start backend server
+      working-directory: culinary-canvas/capstone-project/backend
+      run: |
+        node index.js &
+        echo $! > backend_pid.txt
+        sleep 10
         
     - name: Test get recipes
       env:
@@ -24,9 +31,9 @@ jobs:
         
       run: |
         node -e "
-        const https = require('https');
+        const http = require('http');
         const options = {
-          hostname: 'localhost',
+          hostname: '127.0.0.1',
           port: 3000,
           path: '/recipes',
           method: 'GET',
@@ -34,7 +41,7 @@ jobs:
             'Authorization': 'Bearer ' + process.env.AUTH_TOKEN
           }
         };
-        const req = https.request(options, (res) => {
+        const req = http.request(options, (res) => {
           if (res.statusCode === 200){
             console.log('Backend is running correctly')
             process.exit(0)
@@ -112,11 +119,3 @@ jobs:
     - name: Build frontend
       working-directory: ./capstone-project/frontend/capstone-project
       run: npm run build
-
-    - name: Start backend server
-      working-directory: ./capstone-project/backend
-      run: |
-        pwd
-        ls -la
-        node index.js &
-        echo $! > backend_pid.txt
