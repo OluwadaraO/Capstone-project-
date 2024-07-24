@@ -99,7 +99,7 @@ jobs:
         const http = require('http');
         const options = {
           hostname : 'localhost',
-          port: 3000,
+          port: '127.0.0.1',
           path: '/scrape-recipe',
           method: 'POST',
           headers: {
@@ -107,14 +107,20 @@ jobs:
           }
         };
         const req = http.request(options, (res) => {
-        if (res.statusCode === 200){
-          console.log('Web scraping flow is working correctly');
-          process.exit(0);
-        }else{
-          console.log('Web scraping flow is not working correctly');
-          console.log('Status Code: ', res.statusCode);
-          process.exit(1)
-        }
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            if (res.statusCode === 200){
+              console.log('Web scraping flow is working correctly');
+              process.exit(0);
+            }else{
+              console.log('Web scraping flow is not working correctly');
+              console.log('Status Code: ', res.statusCode);
+              process.exit(1)
+            }
+          });
         });
         req.on('error', (error) => {
           console.error('Error: ', error);
