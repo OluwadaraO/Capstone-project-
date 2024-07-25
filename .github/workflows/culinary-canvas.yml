@@ -68,7 +68,7 @@ jobs:
 
     - name: Test web scraping flow
       env:
-        TEST_URL: ${{secrets.TEST_URL}}
+        TEST_URL: "${{secrets.TEST_URL}}"
         USER_ID: ${{secrets.USER_ID}}
       run : |
         node -e "
