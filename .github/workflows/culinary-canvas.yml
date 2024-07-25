@@ -10,17 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services: 
-      backend:
-        image: node:18
-        ports:
-          - 3000:3000
-        options: >-
-          --health-cmd="curl --fail http://localhost:3000"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
     - uses : actions/checkout@v2
 
