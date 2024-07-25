@@ -120,7 +120,7 @@ jobs:
               console.log('Status Code: ', res.statusCode);
               process.exit(1)
             }
-          });
+          })
         });
         req.on('error', (error) => {
           console.error('Error: ', error);
