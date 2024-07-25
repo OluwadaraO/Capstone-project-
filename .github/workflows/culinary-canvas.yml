@@ -40,7 +40,48 @@ jobs:
         node index.js &
         echo $! > backend_pid.txt
         sleep 15
-        
+
+    - name: Test web scraping flow
+      env:
+        TEST_URL: ${{secrets.TEST_URL}}
+        USER_ID: ${{secrets.USER_ID}}
+      run : |
+        node -e "
+        const http = require('http');
+        const options = {
+          hostname : '127.0.0.1',
+          port: 3000,
+          path: '/scrape-recipe',
+          method: 'POST',
+          headers: {
+            'Content-Type' : 'application/json'
+          }
+        };
+        const req = http.request(options, (res) => {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            if (res.statusCode === 200){
+              console.log('Web scraping flow is working correctly');
+              process.exit(0);
+            }else{
+              console.log('Web scraping flow is not working correctly');
+              console.log('Status Code: ', res.statusCode);
+              process.exit(1)
+            }
+          })
+        });
+        req.on('error', (error) => {
+          console.error('Error: ', error);
+          process.exit(1)
+        });
+        req.write(JSON.stringify({
+           url: process.env.TEST_URL,
+           userId: process.env.USER_ID
+        }));
+        req.end();"
     - name: Test get recipes
       env:
         AUTH_TOKEN: ${{secrets.AUTH_TOKEN}}
@@ -89,48 +130,6 @@ jobs:
     - name : Generate Prisma Client
       working-directory: culinary-canvas/capstone-project/backend
       run: npx prisma generate
-
-    - name: Test web scraping flow
-      env:
-        TEST_URL: ${{secrets.TEST_URL}}
-        USER_ID: ${{secrets.USER_ID}}
-      run : |
-        node -e "
-        const http = require('http');
-        const options = {
-          hostname : '127.0.0.1',
-          port: 3000,
-          path: '/scrape-recipe',
-          method: 'POST',
-          headers: {
-            'Content-Type' : 'application/json'
-          }
-        };
-        const req = http.request(options, (res) => {
-          let data = '';
-          res.on('data', (chunk) => {
-            data += chunk;
-          });
-          res.on('end', () => {
-            if (res.statusCode === 200){
-              console.log('Web scraping flow is working correctly');
-              process.exit(0);
-            }else{
-              console.log('Web scraping flow is not working correctly');
-              console.log('Status Code: ', res.statusCode);
-              process.exit(1)
-            }
-          })
-        });
-        req.on('error', (error) => {
-          console.error('Error: ', error);
-          process.exit(1)
-        });
-        req.write(JSON.stringify({
-           url: process.env.TEST_URL,
-           userId: process.env.USER_ID
-        }));
-        req.end();"
 
     - name: Build frontend
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
