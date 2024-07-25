@@ -155,10 +155,6 @@ jobs:
       run: |
         python3 webScraper.py "${{secrets.TEST_URL}}"
 
-    - name: Test sign up
-      working-directory: culinary-canvas/capstone-project/backend
-      
-
     - name: Test get recipes
       env:
         AUTH_TOKEN: ${{secrets.AUTH_TOKEN}}
