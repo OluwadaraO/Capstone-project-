@@ -33,10 +33,16 @@ jobs:
     - name: Install frontend dependencies
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: npm ci
+
+    - name: Build frontend
+      working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
+      run: npm run build
       
     - name: Start backend server
       working-directory: culinary-canvas/capstone-project/backend
       env:
+        DATABASE_URL : ${{secrets.DATABASE_URL}}
+        SECRET_KEY: ${{secrets.JWT_SECRET_TOKEN}}
         PRIVATE_VAPID_KEY: ${{ secrets.PRIVATE_VAPID_KEY }}
         PUBLIC_VAPID_KEY: ${{ secrets.PUBLIC_VAPID_KEY }}
       run: |
@@ -60,11 +66,98 @@ jobs:
     - name : Generate Prisma Client
       working-directory: culinary-canvas/capstone-project/backend
       run: npx prisma generate
+
+    - name: Create account and run tests
+      id: auth
+      run: |
+        node << EOF
+        const fetch = require('node-fetch');
+        const BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`
+        const TEST_USERNAME = process.env.TEST_USERNAME
+        const TEST_PASSWORD = process.env.TEST_PASSWORD
+
+        async function createAccountandLogin(){
+          let response = await fetch(`${BASE_URL}/create`, {
+            method: 'POST',
+            headers: {
+              'Content-Type' : 'application/json',
+            },
+            body: JSON.stringify({
+              userName: TEST_USERNAME,
+              name: 'Test User',
+              password: TEST_PASSWORD
+            }),
+          });
+          let data = await response.json();
+          if (response.status !== 200 || !data.newUserAccount){
+            throw new Error(`Failed to create account: ${JSON.stringify(data)}`);
+          }
+          console.log('Account created successfully!');
+
+          response = await fetch(`${BASE_URL}/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type' : 'application/json',
+            },
+            body: JSON.stringify({
+              userName: TEST_USERNAME,
+              password: TEST_PASSWORD
+            }),
+          });
+          data = await response.json();
+          if(!data.token){
+            throw new Error('Failed to login')
+          };
+          console.log('Login successful');
+
+          console.log(`::set-output name=token::${data.token}`)
+        }
+
+        createAccountandLogin().catch(error => {
+          console.error('Test failed: ', error);
+        });
+
+        EOF
+      env: 
+        BASE_URL: http://localhost:3000
+        TEST_USERNAME: ${{github.sha}}-testuser
+        TEST_PASSWORD: ${{github.sha}}-testpassword
+
+    - name: Test protected route
+      run: |
+        node << EOF
+        const fetch = require('node-fetch');
+        const BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`;
+        const TOKEN = process.env.TOKEN;
+
+        async function testProtectedRoute() {
+          const response = await fetch(`${BASE_URL}/protected`, {
+            headers: {
+              Cookie: `token=${TOKEN}`
+            }
+          });
+          const data = await response.json();
+          if(!data.id){
+            throw new Error('Failed to access protected route');
+          }
+          console.log('Protected route access successful')
+        }
+        testProtectedRoute().catch(error => {
+          console.error('Test failed: ', error);
+        });
+        EOF
+      env:
+        BASE_URL: http://localhost:3000
+        TOKEN: ${{steps.auth.outputs.token}}
       
     - name: Test Python script
       working-directory: culinary-canvas/capstone-project/backend
       run: |
         python3 webScraper.py "${{secrets.TEST_URL}}"
+
+    - name: Test sign up
+      working-directory: culinary-canvas/capstone-project/backend
+      
 
     - name: Test get recipes
       env:
@@ -145,7 +238,4 @@ jobs:
         console.log('Sending request with data: ', postData);
         req.write(postData);
         req.end();"
-        
-    - name: Build frontend
-      working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
-      run: npm run build
+  
