@@ -225,7 +225,7 @@ jobs:
               console.log('Web scraping flow is not working correctly');
               console.log('Status Code: ', res.statusCode);
             }
-          })
+          });
         });
         req.on('error', (error) => {
           console.error('Error: ', error);
