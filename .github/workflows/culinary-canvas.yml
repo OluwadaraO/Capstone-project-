@@ -83,7 +83,6 @@ jobs:
           }
         };
         const req = http.request(options, (res) => {
-          console.log('Status Code: ', res.statusCode);
           res.setEncoding('utf8');
           res.on('data', (chunk) => {
             console.log('Response: '+ chunk);
@@ -121,9 +120,9 @@ jobs:
           }
         };
         const req = http.request(options, (res) => {
-          let data = '';
+          res.setEncoding('utf8');
           res.on('data', (chunk) => {
-            data += chunk;
+            console.log('Response: '+ chunk);
           });
           res.on('end', () => {
             if (res.statusCode === 200){
@@ -132,7 +131,6 @@ jobs:
             }else{
               console.log('Web scraping flow is not working correctly');
               console.log('Status Code: ', res.statusCode);
-              process.exit(1)
             }
           })
         });
