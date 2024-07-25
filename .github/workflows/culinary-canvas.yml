@@ -70,7 +70,7 @@ jobs:
     - name: Create account and run tests
       id: auth
       run: |
-        node << EOF
+        node -e "
         const fetch = require('node-fetch');
         const BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`
         const TEST_USERNAME = process.env.TEST_USERNAME
@@ -117,7 +117,7 @@ jobs:
           console.error('Test failed: ', error);
         });
 
-        EOF
+        "
       env: 
         BASE_URL: http://localhost:3000
         TEST_USERNAME: ${{github.sha}}-testuser
@@ -125,7 +125,7 @@ jobs:
 
     - name: Test protected route
       run: |
-        node << EOF
+        node -e "
         const fetch = require('node-fetch');
         const BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`;
         const TOKEN = process.env.TOKEN;
@@ -145,7 +145,7 @@ jobs:
         testProtectedRoute().catch(error => {
           console.error('Test failed: ', error);
         });
-        EOF
+        "
       env:
         BASE_URL: http://localhost:3000
         TOKEN: ${{steps.auth.outputs.token}}
