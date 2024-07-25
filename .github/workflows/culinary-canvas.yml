@@ -80,7 +80,7 @@ jobs:
         TEST_PASSWORD = process.env.TEST_PASSWORD
 
         async function createAccountandLogin(){
-          let response = await fetch(`${BASE_URL}/create`, {
+          let response = await fetch(`http://localhost:3000/create`, {
             method: 'POST',
             headers: {
               'Content-Type' : 'application/json',
@@ -97,7 +97,7 @@ jobs:
           }
           console.log('Account created successfully!');
 
-          response = await fetch(`${BASE_URL}/login`, {
+          response = await fetch(`http://localhost:3000/login`, {
             method: 'POST',
             headers: {
               'Content-Type' : 'application/json',
@@ -134,7 +134,7 @@ jobs:
         TOKEN = process.env.TOKEN
 
         async function testProtectedRoute() {
-          const response = await fetch(`${BASE_URL}/protected`, {
+          const response = await fetch(`http://localhost:3000/protected`, {
             headers: {
               Cookie: `token=${TOKEN}`
             }
