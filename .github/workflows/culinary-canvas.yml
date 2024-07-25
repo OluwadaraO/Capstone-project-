@@ -75,9 +75,9 @@ jobs:
       run: |
         node -e "
         const fetch = require('node-fetch');
-        BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`
-        TEST_USERNAME = process.env.TEST_USERNAME || '$TEST_USERNAME'
-        TEST_PASSWORD = process.env.TEST_PASSWORD || '$TEST_PASSWORD'
+        BASE_URL = process.env.BACKEND_ADDRESS
+        TEST_USERNAME = process.env.TEST_USERNAME
+        TEST_PASSWORD = process.env.TEST_PASSWORD
 
         async function createAccountandLogin(){
           let response = await fetch(`${BASE_URL}/create`, {
@@ -130,8 +130,8 @@ jobs:
       run: |
         node -e "
         const fetch = require('node-fetch');
-        const BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`;
-        const TOKEN = process.env.TOKEN;
+        BASE_URL = process.env.BACKEND_ADDRESS
+        TOKEN = process.env.TOKEN
 
         async function testProtectedRoute() {
           const response = await fetch(`${BASE_URL}/protected`, {
