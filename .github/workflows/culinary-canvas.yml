@@ -104,7 +104,7 @@ jobs:
         });
         const postData = JSON.stringify({
            url: process.env.TEST_URL,
-           userId: process.env.USER_ID
+           userId: parseInt(process.env.USER_ID, 10);
         });
         console.log('Sending request with data: ', postData);
         req.write(postData);
