@@ -36,6 +36,9 @@ jobs:
       
     - name: Start backend server
       working-directory: culinary-canvas/capstone-project/backend
+      env:
+        VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+        VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
       run: |
         node index.js &
         echo $! > backend_pid.txt
