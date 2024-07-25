@@ -99,7 +99,7 @@ jobs:
           let data = await response.json();
           if (response.status !== 200 || !data.newUserAccount){
             throw new Error(`Failed to create account`);
-          }
+          };
           console.log('Account created successfully!');
 
           response = await fetch(`${BASE_URL}/login`, {
