@@ -26,6 +26,83 @@ function HomePage() {
     "salad",
     "pasta",
   ];
+  //filter options
+  const filterCategories = {
+    health: [
+    {value: "alcohol-free", label: 'No Alcohol'},
+    {value: "vegan", label: 'Vegan'},
+    {value: "vegetarian", label: 'Vegetarian'},
+    {value: "egg-free", label: 'Egg Free'},
+    {value: "celery-free", label: 'Celery Free'},
+    {value: "crustacean-free", label: 'Crustacean Free'},
+    {value: "DASH", label: 'DASH'},
+    {value: "fish-free", label: ' Fish Free'},
+    {value: "fodmap-free", label: 'Fodmap Free'},
+    {value: "gluten-free", label: 'Gluten Free'},
+    {value: "immuno-supportive", label: 'Immuno-supportive'},
+    {value: "keto-friendly", label: 'Keto Friendly'},
+    {value: "kidney-friendly", label: 'Kidney Friendly'},
+    {value: "kosher", label: 'Kosher'},
+    {value: "low-potassium", label: 'Low Potassium'},
+    {value: "low-sugar", label: 'Low Sugar'},
+    {value: "lupine-free", label: 'Lupine Free'},
+    {value: "Mediterranean", label: 'Mediterranean'},
+    {value: "mollusk-free", label: 'Mollusk Free'},
+    {value: "mustard-free", label: 'Mustard Free'},
+    {value: "No-oil-added", label: 'No oil added'},
+    {value: "paleo", label: 'Paleo'},
+    {value: "peanut-free", label: 'Peanut Free'},
+    {value: "pecatarian", label: 'Pescatarian'},
+    {value: "pork-free", label: 'Pork Free'},
+    {value: "red-meat-free", label: 'Red Meat Free'},
+    {value: "sesame-free", label: 'Sesame Free'},
+    {value: "shellfish-free", label: 'Shellfish Free'},
+    {value: "soy-free", label: 'Soy Free'},
+    {value: "sugar-conscious", label: 'Sugar-Conscious'},
+    {value: "sulfite-free", label: 'Sulfite-Free'},
+    {value: "tree-nut-free", label: 'Tree-Nut-Free'},
+    {value: "wheat-free", label: 'Wheat-Free'},
+    {value: "Alcohol-Cocktail", label: 'alcohol-cocktail'},
+  ],
+  mealType: [
+    {value: "breakfast", label: "Breakfast"},
+    {value: "lunch", label: "Lunch"},
+    {value: "snack", label: "Snack"},
+    {value: "teatime", label: "Teatime"},
+  ],
+  diet:[
+    {value: "balanced", label: "Balanced"},
+    {value: "high-fiber", label: "High Fiber"},
+    {value: "high-protein", label: "High Protein"},
+    {value: "low-carb", label: "Low Carb"},
+    {value: "low-fat", label: "	Low Fat"},
+    {value: "low-sodium", label: "Low Sodium"},
+  ],
+  cuisineType: [
+    {value: "american", label: "American"},
+    {value: "asian", label: "Asian"},
+    {value: "british", label: "British"},
+    {value: "caribbean", label: "Caribbean"},
+    {value: "central europe", label: "Central Europe"},
+    {value: "chinese", label: "Chinese"},
+    {value: "eastern europe", label: "Eastern Europe"},
+    {value: "french", label: "French"},
+    {value: "greek", label: "Greek"},
+    {value: "indian", label: "Indian"},
+    {value: "italian", label: "Italian"},
+    {value: "japanese", label: "Japanese"},
+    {value: "korean", label: "Korean"},
+    {value: "kosher", label: "Kosher"},
+    {value: "mediterranean", label: "Mediterranean"},
+    {value: "mexican", label: "Mexican"},
+    {value: "middle eastern", label: "Middle Easternd"},
+    {value: "nordic", label: "Nordic"},
+    {value: "south american", label: "South American"},
+    {value: "south east asian", label: "South East Asian"},
+    {value: "world", label: "World"},
+  ]
+  }
+  const [activeFilter, setActiveFilter] = useState({category: null, value: null})
   //state to manage search query
   const [query, setQuery] = useState("");
   //state to manage search results
@@ -34,8 +111,8 @@ function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   //state to manage search button text
   const [isSearching, setIsSearching] = useState(false);
-  //state to manage category filter
-  const [filters, setFilters] = useState([]);
+  //constant to track if search is completed
+  const [searchCompleted, setSearchCompleted] = useState(false)
   //state to manage savedRecipes
   const [savedRecipes, setSavedRecipes] = useState([]);
   //state to manage liked recipes
@@ -110,15 +187,14 @@ function HomePage() {
   }
 
   //function to fetch recipies for a given query from Edamam API
-  const fetchRecipies = async (searchQuery, filterQueries) => {
+  const fetchRecipies = async (searchQuery, activeFilters) => {
     let url = `${backendAddress}/recipes?`;
 
     if (searchQuery) {
       url += `category=${searchQuery}&`;
     }
-    if (filterQueries.length > 0) {
-      let filtersParam = filterQueries.map((f) => `health=${f}`).join("&");
-      url += `${filtersParam}`;
+    if(activeFilters.category && activeFilter.value){
+      url += `${activeFilter.category}=${encodeURIComponent(activeFilter.value)}&`
     }
     try {
       const response = await fetch(url, {
@@ -169,34 +245,36 @@ function HomePage() {
   };
 
   useEffect(() => {
-    if (query.length > 0 || filters.length > 0) {
+    if (query.length > 0) {
       const delayDebounceFn = setTimeout(async () => {
         setIsLoading(true);
-        const results = await fetchRecipies(query, filters);
+        const results = await fetchRecipies(query, activeFilter);
         setSearchResults(results);
         setIsLoading(false);
         setIsSearching(true);
+        setSearchCompleted(true)
       }, 500);
       return () => clearTimeout(delayDebounceFn);
     } else {
       setSearchResults([]);
       setIsSearching(false);
+      setSearchCompleted(false)
     }
-  }, [query, filters]);
+  }, [query, activeFilter]);
 
   useEffect(() => {
     const fetchAllRecipes = async () => {
       //stores recipies for all queries
       const allRecipes = {};
       for (let query of queries) {
-        const recipes = await fetchRecipies(query, filters);
+        const recipes = await fetchRecipies(query, activeFilter);
         allRecipes[query] = recipes;
       }
       setRecipes(allRecipes);
       setIsLoading(false);
     };
     fetchAllRecipes();
-  }, [filters]);
+  }, [query, activeFilter]);
 
   const handleRecipeCardClick = (e) => {
     const card = e.target.value;
@@ -209,18 +287,20 @@ function HomePage() {
   }
 
   const handleSearchReset = () => {
+    setActiveFilter({category: null, value: null})
     setQuery("");
     setSearchResults([]);
     setIsSearching(false);
+    setSearchCompleted(true)
   };
 
-  const handleFilterChange = (event) => {
-    const filter = event.target.value;
-    setFilters((prevFilters) =>
-      prevFilters.includes(filter)
-        ? prevFilters.filter((f) => f !== filter)
-        : [...prevFilters, filter]
-    );
+  const handleFilterChange = (category, value) => {
+    if (activeFilter.category === category && activeFilter.value === value){
+      setActiveFilter({category: null, value: null})
+    }
+    else{
+      setActiveFilter({category, value})
+    }
   };
 
   const handleLike = async (recipe) => {
@@ -436,17 +516,8 @@ function HomePage() {
           </button>
           <div>
           <Link to="/notifications">
-          <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" fill="#000000" height="40px" width="40px" version="1.1" id="Capa_1" viewBox="0 0 611.999 611.999" xmlSpace="preserve">
-          <g>
-          <g>
-            <g>
-              <path d="M570.107,500.254c-65.037-29.371-67.511-155.441-67.559-158.622v-84.578c0-81.402-49.742-151.399-120.427-181.203     C381.969,34,347.883,0,306.001,0c-41.883,0-75.968,34.002-76.121,75.849c-70.682,29.804-120.425,99.801-120.425,181.203v84.578     c-0.046,3.181-2.522,129.251-67.561,158.622c-7.409,3.347-11.481,11.412-9.768,19.36c1.711,7.949,8.74,13.626,16.871,13.626     h164.88c3.38,18.594,12.172,35.892,25.619,49.903c17.86,18.608,41.479,28.856,66.502,28.856     c25.025,0,48.644-10.248,66.502-28.856c13.449-14.012,22.241-31.311,25.619-49.903h164.88c8.131,0,15.159-5.676,16.872-13.626     C581.586,511.664,577.516,503.6,570.107,500.254z M484.434,439.859c6.837,20.728,16.518,41.544,30.246,58.866H97.32     c13.726-17.32,23.407-38.135,30.244-58.866H484.434z M306.001,34.515c18.945,0,34.963,12.73,39.975,30.082     c-12.912-2.678-26.282-4.09-39.975-4.09s-27.063,1.411-39.975,4.09C271.039,47.246,287.057,34.515,306.001,34.515z      M143.97,341.736v-84.685c0-89.343,72.686-162.029,162.031-162.029s162.031,72.686,162.031,162.029v84.826     c0.023,2.596,0.427,29.879,7.303,63.465H136.663C143.543,371.724,143.949,344.393,143.97,341.736z M306.001,577.485     c-26.341,0-49.33-18.992-56.709-44.246h113.416C355.329,558.493,332.344,577.485,306.001,577.485z"/>
-              <path d="M306.001,119.235c-74.25,0-134.657,60.405-134.657,134.654c0,9.531,7.727,17.258,17.258,17.258     c9.531,0,17.258-7.727,17.258-17.258c0-55.217,44.923-100.139,100.142-100.139c9.531,0,17.258-7.727,17.258-17.258     C323.259,126.96,315.532,119.235,306.001,119.235z"/>
-            </g>
-          </g>
-        </g>
-        </svg>
-        </Link>
+            <img src="./bell.png"/>
+          </Link>
           </div>
         </div>
       ) : (
@@ -478,60 +549,32 @@ function HomePage() {
           {isSearching ? "Back to Recommended Recipes" : "Search"}
         </button>
       </div>
-      <div className="filter-options">
-        <label>
-          <input
-            type="checkbox"
-            value="low-fat"
-            checked={filters.includes("low-fat")}
-            onChange={handleFilterChange}
-          />
-          Low Fat
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="alcohol-free"
-            checked={filters.includes("alcohol-free")}
-            onChange={handleFilterChange}
-          />
-          No Alcohol
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="vegan"
-            checked={filters.includes("vegan")}
-            onChange={handleFilterChange}
-          />
-          Vegan
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="vegetarian"
-            checked={filters.includes("vegetarian")}
-            onChange={handleFilterChange}
-          />
-          Vegetarian
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            value="egg-free"
-            checked={filters.includes("egg-free")}
-            onChange={handleFilterChange}
-          />
-          Egg-Free
-        </label>
-      </div>
+      {isSearching && (
+        <div className="filter-options">
+          {Object.entries(filterCategories).map(([category, options]) => (
+            <div key={category} className="filter-category">
+              <h4>{category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+              <select
+                value={activeFilter.category === category ? activeFilter.value: ''}
+                onChange={(e) => handleFilterChange(category, e.target.value)}
+              >
+                <option value="">None</option>
+                {options.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+      )}
       {isLoading && <LoadingSpinner />}
 
       {!isLoading && searchResults.length > 0 && (
         <div className="search-results">
           {searchResults.map((result, index) => (
             <div key={index} className="recipe-card">
-
               <img src={result.image} alt={result.label} />
               <h3>{result.label}</h3>
               <p>Calories: {Math.round(result.calories)}</p>
@@ -585,7 +628,12 @@ function HomePage() {
           ))}
         </div>
       )}
-      {!isLoading && searchResults.length === 0 && (
+      {!isLoading && searchCompleted && searchResults.length === 0 && (
+        <div className="no-results">
+          <p>No results found for your search. Please try different keywords or filter.</p>
+        </div>
+      )}
+      {!isLoading && searchResults.length === 0 && !searchCompleted &&  (
         <div>
           <RecipeOfTheDay />
           <div className="recipe-sections">
