@@ -75,12 +75,13 @@ jobs:
       run: |
         node -e "
         const fetch = require('node-fetch');
+        const fs = require('fs')
         BASE_URL = process.env.BACKEND_ADDRESS
         TEST_USERNAME = process.env.TEST_USERNAME
         TEST_PASSWORD = process.env.TEST_PASSWORD
 
         async function createAccountandLogin(){
-          let response = await fetch(`http://localhost:3000/create`, {
+          let response = await fetch(`https://localhost:3000/create`, {
             method: 'POST',
             headers: {
               'Content-Type' : 'application/json',
@@ -93,11 +94,11 @@ jobs:
           });
           let data = await response.json();
           if (response.status !== 200 || !data.newUserAccount){
-            throw new Error(`Failed to create account: ${JSON.stringify(data)}`);
+            throw new Error(`Failed to create account`);
           }
           console.log('Account created successfully!');
 
-          response = await fetch(`http://localhost:3000/login`, {
+          response = await fetch(`https://localhost:3000/login`, {
             method: 'POST',
             headers: {
               'Content-Type' : 'application/json',
@@ -113,7 +114,7 @@ jobs:
           };
           console.log('Login successful');
 
-          console.log(`::set-output name=token::${data.token}`)
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `token=${data.token}\n`)
         }
 
         createAccountandLogin().catch(error => {
