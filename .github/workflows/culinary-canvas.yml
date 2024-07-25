@@ -67,14 +67,17 @@ jobs:
       working-directory: culinary-canvas/capstone-project/backend
       run: npx prisma generate
 
+    - name: Install node-fetch
+      run: npm install node-fetch
+
     - name: Create account and run tests
       id: auth
       run: |
         node -e "
         const fetch = require('node-fetch');
         const BASE_URL = process.env.BACKEND_ADDRESS || `http://localhost:3000`
-        const TEST_USERNAME = process.env.TEST_USERNAME
-        const TEST_PASSWORD = process.env.TEST_PASSWORD
+        const TEST_USERNAME = process.env.TEST_USERNAME || '$TEST_USERNAME'
+        const TEST_PASSWORD = process.env.TEST_PASSWORD || '$TEST_PASSWORD'
 
         async function createAccountandLogin(){
           let response = await fetch(`${BASE_URL}/create`, {
@@ -120,8 +123,8 @@ jobs:
         "
       env: 
         BASE_URL: http://localhost:3000
-        TEST_USERNAME: ${{github.sha}}-testuser
-        TEST_PASSWORD: ${{github.sha}}-testpassword
+        TEST_USERNAME: ${TEST_USERNAME:-${{github.sha}}-testuser}
+        TEST_PASSWORD: ${TEST_PASSWORD:-${{github.sha}}-testpassword}
 
     - name: Test protected route
       run: |
