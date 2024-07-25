@@ -43,10 +43,7 @@ jobs:
         node index.js &
         echo $! > backend_pid.txt
         sleep 15
-
-    - name: Display server logs
-      run: cat server.log
-
+        
     - name: Set up Python
       uses: actions/setup-python@v4
       with: 
