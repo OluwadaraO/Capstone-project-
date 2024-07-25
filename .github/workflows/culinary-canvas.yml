@@ -44,6 +44,31 @@ jobs:
         echo $! > backend_pid.txt
         sleep 15
 
+    - name: Display server logs
+      run: cat server.log
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with: 
+        python-version: '3.x'
+
+    - name : Check installed packages
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npm list @prisma/client
+
+    - name : Install Prisma Client
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npm install @prisma/client
+      
+    - name : Generate Prisma Client
+      working-directory: culinary-canvas/capstone-project/backend
+      run: npx prisma generate
+      
+    - name: Test Python script
+      working-directory: culinary-canvas/capstone-project/backend
+      run: |
+        python3 webScraper.py "${{secrets.TEST_URL}}"
+
     - name: Test web scraping flow
       env:
         TEST_URL: ${{secrets.TEST_URL}}
@@ -80,11 +105,14 @@ jobs:
           console.error('Error: ', error);
           process.exit(1)
         });
-        req.write(JSON.stringify({
+        const postData = JSON.stringify({
            url: process.env.TEST_URL,
            userId: process.env.USER_ID
-        }));
+        });
+        console.log('Sending request with data: ', postData);
+        req.write(postData);
         req.end();"
+        
     - name: Test get recipes
       env:
         AUTH_TOKEN: ${{secrets.AUTH_TOKEN}}
@@ -121,18 +149,6 @@ jobs:
           process.exit(1);
         });
         req.end();"
-
-    - name : Check installed packages
-      working-directory: culinary-canvas/capstone-project/backend
-      run: npm list @prisma/client
-
-    - name : Install Prisma Client
-      working-directory: culinary-canvas/capstone-project/backend
-      run: npm install @prisma/client
-      
-    - name : Generate Prisma Client
-      working-directory: culinary-canvas/capstone-project/backend
-      run: npx prisma generate
 
     - name: Build frontend
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
