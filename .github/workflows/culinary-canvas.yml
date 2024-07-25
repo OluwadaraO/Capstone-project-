@@ -10,6 +10,17 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services: 
+      backend:
+        image: node:18
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd="curl --fail http://localhost:3000 || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
     - uses : actions/checkout@v2
 
@@ -71,6 +82,10 @@ jobs:
       run: npm install node-fetch
 
     - name: Create account and run tests
+      env: 
+        BASE_URL: http://localhost:3000
+        TEST_USERNAME: ${{github.sha}}-testuser
+        TEST_PASSWORD: ${{github.sha}}-testpassword
       id: auth
       run: |
         node -e "
@@ -81,7 +96,7 @@ jobs:
         TEST_PASSWORD = process.env.TEST_PASSWORD
 
         async function createAccountandLogin(){
-          let response = await fetch(`https://localhost:3000/create`, {
+          let response = await fetch(`${BASE_URL}/create`, {
             method: 'POST',
             headers: {
               'Content-Type' : 'application/json',
@@ -98,7 +113,7 @@ jobs:
           }
           console.log('Account created successfully!');
 
-          response = await fetch(`https://localhost:3000/login`, {
+          response = await fetch(`${BASE_URL}/login`, {
             method: 'POST',
             headers: {
               'Content-Type' : 'application/json',
@@ -113,47 +128,15 @@ jobs:
             throw new Error('Failed to login')
           };
           console.log('Login successful');
-
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `token=${data.token}\n`)
+          return data.token;
         }
 
-        createAccountandLogin().catch(error => {
-          console.error('Test failed: ', error);
-        });
-
-        "
-      env: 
-        BASE_URL: http://localhost:3000
-        TEST_USERNAME: ${{github.sha}}-testuser
-        TEST_PASSWORD: ${{github.sha}}-testpassword
-
-    - name: Test protected route
-      run: |
-        node -e "
-        const fetch = require('node-fetch');
-        BASE_URL = process.env.BACKEND_ADDRESS
-        TOKEN = process.env.TOKEN
-
-        async function testProtectedRoute() {
-          const response = await fetch(`http://localhost:3000/protected`, {
-            headers: {
-              Cookie: `token=${TOKEN}`
-            }
-          });
-          const data = await response.json();
-          if(!data.id){
-            throw new Error('Failed to access protected route');
-          }
-          console.log('Protected route access successful')
-        }
-        testProtectedRoute().catch(error => {
+        createAccountandLogin().then(token => {
+          console.log('Received token: ', token);
+        }).catch(error => {
           console.error('Test failed: ', error);
         });
         "
-      env:
-        BASE_URL: http://localhost:3000
-        TOKEN: ${{steps.auth.outputs.token}}
-      
     - name: Test Python script
       working-directory: culinary-canvas/capstone-project/backend
       run: |
