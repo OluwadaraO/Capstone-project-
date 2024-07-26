@@ -77,6 +77,20 @@ jobs:
       with: 
         python-version: '3.x'
 
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install flake8 mypy
+        if [ -f culinary-canvas/capstone-project/backend/requirements.txt ]; then pip3 install -r culinary-canvas/capstone-project/backend/requirements.txt; fi
+
+    - name: Run Flake8
+      working-directory: culinary-canvas/capstone-project/backend
+      run: python3 -m flake8 webScraper.py
+
+    - name: Run mypy
+      working-directory: culinary-canvas/capstone-project/backend
+      run: python3 -m mypy webScraper.py
+
     - name : Check installed packages
       working-directory: culinary-canvas/capstone-project/backend
       run: npm list @prisma/client
