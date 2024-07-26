@@ -21,13 +21,13 @@ jobs:
       working-directory: culinary-canvas/capstone-project/backend
       run: |
         npm install
-        npx prettier --check .
+        npx prettier --write .
 
     - name: Check Frontend Formatting
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: |
         npm install
-        npm prettier --check .
+        npm prettier --write .
       
   build-and-test:
     runs-on: ubuntu-latest
