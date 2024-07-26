@@ -1,4 +1,4 @@
-const {ALLERGENS, DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS, NUTRIENT_CONSTANTS} = require('./healthScoreConstants.js')
+const {DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS, NUTRIENT_CONSTANTS} = require('./healthScoreConstants.js')
 
 const calculateNutrientScores = (totalNutrients, calories) => {
     return{
@@ -56,21 +56,26 @@ const calculateNutrientImpactScore = (totalNutrients, nutrients) => {
 const calculateHealthLabelImpact = (healthLabels, totalNutrients, dietLabels) => {
     return healthLabels.reduce((score, label) => {
         switch(label){
-            case 'Sugar-Conscious':
+            case 'Sugar-Conscious': {
                 return score + (totalNutrients.SUGAR ? (100 - Math.min((totalNutrients.SUGAR.quantity / 50) * 100, 100)) : 100);
-            case 'Low-Fat':
+            }
+            case 'Low-Fat': {
                 return score + (totalNutrients.FAT ? (100 - Math.min((totalNutrients.FAT.quantity / 70) * 100, 100)) : 100);
-            case 'Low-Sodium':
+            }
+            case 'Low-Sodium':{
                 return score + (totalNutrients.NA ? (100 - Math.min((totalNutrients.NA.quantity / 2300) * 100, 100)) : 100);
-            case 'Keto-Friendly':
+            }
+            case 'Keto-Friendly':{
                 return score + (dietLabels.includes('Low-Carb') ? 100 : 0);
-            case 'Immuno-Supportive':
+            }
+            case 'Immuno-Supportive':{
                 const vitCScore = totalNutrients.VITC ? Math.min((totalNutrients.VITC.quantity / 60) * 100, 100) : 0;
                 const vitAScore = totalNutrients.VITA_RAE ? Math.min((totalNutrients.VITA_RAE.quantity / 900) * 100, 100) : 0;
                 const zincScore = totalNutrients.ZN ? Math.min((totalNutrients.ZN.quantity / 11) * 100, 100) : 0;
                 const VITDScore = totalNutrients.VITD ? Math.min((totalNutrients.VITD.quantity / 10) * 100, 100) : 0;
                 const immuneSupportScore = (vitAScore + vitCScore + zincScore + VITDScore) / 4;
                 return score + immuneSupportScore;
+            }
             case 'Vegan' :
             case 'Soy-Free':
             case 'Vegetarian':

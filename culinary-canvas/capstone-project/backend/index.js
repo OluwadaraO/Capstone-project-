@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const { ALLERGENS, DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS } = require('./healthScoreConstants.js')
+const { DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS } = require('./healthScoreConstants.js')
 const calculateHealthScore = require('./calculateHealthScore.js')
 
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
@@ -668,7 +668,6 @@ app.get('/recipes', async (req, res) => {
         const preferences = await prisma.userPreferences.findUnique({
             where: { userId: parseInt(userId) }
         })
-
         const dietaryPreferences = preferences.dietaryPreferences;
         const dietTypes = DIET_TYPES.filter(dietType => dietaryPreferences.includes(dietType));
         const allergens = dietaryPreferences.reduce((acc, preference) => {
