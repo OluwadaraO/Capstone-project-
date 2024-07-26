@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs: 
-  lint:
+  format-check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -17,19 +17,17 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Lint Backend
+    - name: Check Backend Formatting
       working-directory: culinary-canvas/capstone-project/backend
       run: |
         npm install
-        npm install eslint --save-dev
-        npx eslint . --fix
+        npx prettier --write .
 
-    - name: Lint Frontend
+    - name: Check Frontend Formatting
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: |
-        npm ci
-        npm install eslint --save-dev
-        npx eslint . --fix
+        npm install
+        npx prettier --write .
       
   build-and-test:
     runs-on: ubuntu-latest
