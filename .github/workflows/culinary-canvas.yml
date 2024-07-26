@@ -16,20 +16,19 @@ jobs:
       uses: actions/setup-node@v4.0.3
       with:
         node-version: '18'
-        
-    - name: Run ESLint
-      run: npx eslint --global
 
     - name: Lint Backend
       working-directory: culinary-canvas/capstone-project/backend
       run: |
-        npm ci
+        npm install
+        npm install eslint --save-dev
         npx eslint . --fix
 
     - name: Lint Frontend
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: |
         npm ci
+        npm install eslint --save-dev
         npx eslint . --fix
       
   build-and-test:
