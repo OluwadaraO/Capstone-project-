@@ -1,4 +1,4 @@
-const {ALLERGENS, DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS, NUTRIENT_CONSTANTS} = require('./healthScoreConstants.js')
+const {DIET_TYPES, DIETARY_PREFERENCES_TO_ALLERGENS, NUTRIENT_CONSTANTS} = require('./healthScoreConstants.js')
 
 const calculateNutrientScores = (totalNutrients, calories) => {
     return{
