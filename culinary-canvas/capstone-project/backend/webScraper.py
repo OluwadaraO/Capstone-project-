@@ -7,7 +7,6 @@ from html import unescape
 import urllib.robotparser
 import urllib.parse
 import sys
-import json
 
 
 def fetch_html(url):
