@@ -8,3 +8,5 @@ package-lock.json
 .env*
 schema.prisma
 webScraper.py
+calculateHealthScore.js
+healthScoreConstants.js
