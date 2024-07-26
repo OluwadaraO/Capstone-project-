@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "./RedirectToAuthentication";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import ImportRecipeButton from "./ImportRecipeButton";
-import "./ScrapedRecipes.css";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from './RedirectToAuthentication';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import ImportRecipeButton from './ImportRecipeButton';
+import './ScrapedRecipes.css';
 const backendAddress = import.meta.env.VITE_BACKEND_ADDRESS;
 function ScrapedRecipes() {
   const [scrapedRecipes, setScrapedRecipes] = useState([]);
@@ -14,21 +14,18 @@ function ScrapedRecipes() {
   useEffect(() => {
     if (isAuthenticated && user) {
       if (!user) {
-        navigate("/");
+        navigate('/');
       }
       const fetchScrapedRecipe = async () => {
         try {
-          const response = await fetch(
-            `${backendAddress}/scraped-recipes/${user.id}`,
-            {
-              method: "GET",
-              credentials: "include",
-            }
-          );
+          const response = await fetch(`${backendAddress}/scraped-recipes/${user.id}`, {
+            method: 'GET',
+            credentials: 'include',
+          });
           const data = await response.json();
           setScrapedRecipes(data);
         } catch (error) {
-          console.error("Error fetching scraped recipes");
+          console.error('Error fetching scraped recipes');
         }
       };
       fetchScrapedRecipe();
@@ -50,20 +47,18 @@ function ScrapedRecipes() {
   const handleDeleteImportedRecipes = async (id) => {
     try {
       const response = await fetch(`${backendAddress}/scraped-recipes/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       if (response.ok) {
-        alert("Recipe deleted sucessfully!");
-        setScrapedRecipes(
-          scrapedRecipes.filter((scrapedRecipe) => scrapedRecipe.id !== id)
-        );
+        alert('Recipe deleted sucessfully!');
+        setScrapedRecipes(scrapedRecipes.filter((scrapedRecipe) => scrapedRecipe.id !== id));
       } else {
-        console.error("Failed to delete imported recipe");
+        console.error('Failed to delete imported recipe');
       }
     } catch (error) {
-      console.error("Error", error);
+      console.error('Error', error);
     }
   };
 
@@ -87,32 +82,23 @@ function ScrapedRecipes() {
         <ul>
           {scrapedRecipes.map((recipe) => (
             <li key={recipe.id}>
-              <img
-                src={recipe.imageUrl}
-                alt={recipe.title}
-                className="scraped-recipe-image"
-              />
-              <h3>Title: {recipe.title}</h3>
-              <ol>{recipe.ingredients}</ol>
-              <p>Calories: {recipe.calories}</p>
-              <a href={recipe.url} target="_blank" rel="noopener noreferrer">
-                {recipe.url}
-              </a>
-              <button onClick={() => handleDeleteImportedRecipes(recipe.id)}>
-                Delete
-              </button>
+              <div className="scraped-recipes">
+                <img src={recipe.imageUrl} alt={recipe.title} className="scraped-recipe-image" />
+                <h3>{recipe.title}</h3>
+                <ol>{recipe.ingredients}</ol>
+                <p>Calories: {recipe.calories}</p>
+                <a href={recipe.url} target="_blank" rel="noopener noreferrer">
+                  {recipe.url}
+                </a>
+                <button onClick={() => handleDeleteImportedRecipes(recipe.id)}>Delete</button>
+              </div>
             </li>
           ))}
         </ul>
       ) : (
         <p>No recipes have been added. Please import a url to add a recipe</p>
       )}
-      {isModalOpen && (
-        <ImportRecipeButton
-          onClose={closeModal}
-          onRecipeAdded={handleRecipeAdded}
-        />
-      )}
+      {isModalOpen && <ImportRecipeButton onClose={closeModal} onRecipeAdded={handleRecipeAdded} />}
     </div>
   );
 }

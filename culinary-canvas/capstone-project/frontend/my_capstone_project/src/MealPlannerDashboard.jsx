@@ -38,10 +38,10 @@ function MealPlannerDashboard(){
     }
 
     return(
-        <div>
+        <div className="meal-planner-dashboard">
             {mealPlanner.length > 0 ? (
                 mealPlanner.map((plan, index) => (
-                    <div key={index}>
+                    <div key={index} className="meal-card">
                         <p>{plan.day} - {plan.mealType}</p>
                         <img src={plan.recipeImage} alt={plan.recipeName}/>
                         <p>{plan.recipeName}</p>
