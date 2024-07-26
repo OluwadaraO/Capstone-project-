@@ -27,7 +27,7 @@ jobs:
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: |
         npm install
-        npm prettier --write .
+        npx prettier --write .
       
   build-and-test:
     runs-on: ubuntu-latest
