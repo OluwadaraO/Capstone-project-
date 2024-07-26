@@ -73,8 +73,18 @@ export const useNotifications = (userId) => {
         return outputArray;
     }
 
+    const requestNotificationPermission = async() => {
+        const permission = await Notification.requestPermission();
+        return permission === 'granted';
+    }
+
     const subscribeToNotifications = async () => {
         try {
+            const permissionGranted = await requestNotificationPermission();
+            if (!permissionGranted){
+                console.log("Notification permission denied");
+                return;
+            }
             if ('serviceWorker' in navigator) {
                 let registration = await navigator.serviceWorker.getRegistration();
                 if (!registration) {

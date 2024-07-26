@@ -1,0 +1,78 @@
+.footer{
+    background-color: #f8f8f8;
+    padding: 40px 0;
+    font-family: 'Arial', sans-serif;
+}
+
+.footer-content{
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.footer-section{
+    flex: 1;
+    margin: 0 20px;
+}
+
+.footer-section h3{
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.footer-section button{
+    color: #666;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.footer-section button:hover{
+    color: #000;
+}
+.footer-bottom{
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+.footer-bottom p{
+    font-size: 14px;
+    color: #999;
+}
+
+.moving-images{
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+}
+.moving-image{
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    background-size: cover;
+    background-position: center;
+}
+
+.moving-image.active{
+    opacity: 1;
+}
+
+@keyframes moveImgaes{
+    0%, 100% {opacity: 0;}
+    25%, 75% {opacity: 1;}
+}
+
+.moving-image{
+    animation: moveImages 20s infinite;
+}
+
+.moving-image:nth-child(1) {animation-delay: 0s;}
+.moving-image:nth-child(2) {animation-delay: 5s;}
+.moving-image:nth-child(3) {animation-delay: 10s;}
+.moving-image:nth-child(4) {animation-delay: 15s;}

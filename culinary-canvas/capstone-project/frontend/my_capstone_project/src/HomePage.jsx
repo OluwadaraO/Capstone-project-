@@ -1,6 +1,5 @@
 import "./HomePage.css";
 import React, { useEffect, useRef, useState } from "react";
-import Header from "./Header";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./RedirectToAuthentication";
 import LoadingSpinner from "./LoadingSpinner";
@@ -10,9 +9,16 @@ import RecipeOfTheDay from "./RecipeOfTheDay";
 import MealPlannerModal from "./MealPlannerModal";
 import RateLimitModal from "./RateLimitModal";
 import NotificationModal from "./NotificationModal";
+import Footer from "./Footer";
 function HomePage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user, logOut, showNotificationModal, setShowNotificationModal  } = useAuth();
+  const {
+    isAuthenticated,
+    user,
+    logOut,
+    showNotificationModal,
+    setShowNotificationModal,
+  } = useAuth();
   //state to store recipies for each query
   const [recipes, setRecipes] = useState({});
   //array of queries to fetch different categories of recipies
@@ -29,80 +35,83 @@ function HomePage() {
   //filter options
   const filterCategories = {
     health: [
-    {value: "alcohol-free", label: 'No Alcohol'},
-    {value: "vegan", label: 'Vegan'},
-    {value: "vegetarian", label: 'Vegetarian'},
-    {value: "egg-free", label: 'Egg Free'},
-    {value: "celery-free", label: 'Celery Free'},
-    {value: "crustacean-free", label: 'Crustacean Free'},
-    {value: "DASH", label: 'DASH'},
-    {value: "fish-free", label: ' Fish Free'},
-    {value: "fodmap-free", label: 'Fodmap Free'},
-    {value: "gluten-free", label: 'Gluten Free'},
-    {value: "immuno-supportive", label: 'Immuno-supportive'},
-    {value: "keto-friendly", label: 'Keto Friendly'},
-    {value: "kidney-friendly", label: 'Kidney Friendly'},
-    {value: "kosher", label: 'Kosher'},
-    {value: "low-potassium", label: 'Low Potassium'},
-    {value: "low-sugar", label: 'Low Sugar'},
-    {value: "lupine-free", label: 'Lupine Free'},
-    {value: "Mediterranean", label: 'Mediterranean'},
-    {value: "mollusk-free", label: 'Mollusk Free'},
-    {value: "mustard-free", label: 'Mustard Free'},
-    {value: "No-oil-added", label: 'No oil added'},
-    {value: "paleo", label: 'Paleo'},
-    {value: "peanut-free", label: 'Peanut Free'},
-    {value: "pecatarian", label: 'Pescatarian'},
-    {value: "pork-free", label: 'Pork Free'},
-    {value: "red-meat-free", label: 'Red Meat Free'},
-    {value: "sesame-free", label: 'Sesame Free'},
-    {value: "shellfish-free", label: 'Shellfish Free'},
-    {value: "soy-free", label: 'Soy Free'},
-    {value: "sugar-conscious", label: 'Sugar-Conscious'},
-    {value: "sulfite-free", label: 'Sulfite-Free'},
-    {value: "tree-nut-free", label: 'Tree-Nut-Free'},
-    {value: "wheat-free", label: 'Wheat-Free'},
-    {value: "Alcohol-Cocktail", label: 'alcohol-cocktail'},
-  ],
-  mealType: [
-    {value: "breakfast", label: "Breakfast"},
-    {value: "lunch", label: "Lunch"},
-    {value: "snack", label: "Snack"},
-    {value: "teatime", label: "Teatime"},
-  ],
-  diet:[
-    {value: "balanced", label: "Balanced"},
-    {value: "high-fiber", label: "High Fiber"},
-    {value: "high-protein", label: "High Protein"},
-    {value: "low-carb", label: "Low Carb"},
-    {value: "low-fat", label: "	Low Fat"},
-    {value: "low-sodium", label: "Low Sodium"},
-  ],
-  cuisineType: [
-    {value: "american", label: "American"},
-    {value: "asian", label: "Asian"},
-    {value: "british", label: "British"},
-    {value: "caribbean", label: "Caribbean"},
-    {value: "central europe", label: "Central Europe"},
-    {value: "chinese", label: "Chinese"},
-    {value: "eastern europe", label: "Eastern Europe"},
-    {value: "french", label: "French"},
-    {value: "greek", label: "Greek"},
-    {value: "indian", label: "Indian"},
-    {value: "italian", label: "Italian"},
-    {value: "japanese", label: "Japanese"},
-    {value: "korean", label: "Korean"},
-    {value: "kosher", label: "Kosher"},
-    {value: "mediterranean", label: "Mediterranean"},
-    {value: "mexican", label: "Mexican"},
-    {value: "middle eastern", label: "Middle Easternd"},
-    {value: "nordic", label: "Nordic"},
-    {value: "south american", label: "South American"},
-    {value: "south east asian", label: "South East Asian"},
-    {value: "world", label: "World"},
-  ]
-  }
-  const [activeFilter, setActiveFilter] = useState({category: null, value: null})
+      { value: "alcohol-free", label: "No Alcohol" },
+      { value: "vegan", label: "Vegan" },
+      { value: "vegetarian", label: "Vegetarian" },
+      { value: "egg-free", label: "Egg Free" },
+      { value: "celery-free", label: "Celery Free" },
+      { value: "crustacean-free", label: "Crustacean Free" },
+      { value: "DASH", label: "DASH" },
+      { value: "fish-free", label: " Fish Free" },
+      { value: "fodmap-free", label: "Fodmap Free" },
+      { value: "gluten-free", label: "Gluten Free" },
+      { value: "immuno-supportive", label: "Immuno-supportive" },
+      { value: "keto-friendly", label: "Keto Friendly" },
+      { value: "kidney-friendly", label: "Kidney Friendly" },
+      { value: "kosher", label: "Kosher" },
+      { value: "low-potassium", label: "Low Potassium" },
+      { value: "low-sugar", label: "Low Sugar" },
+      { value: "lupine-free", label: "Lupine Free" },
+      { value: "Mediterranean", label: "Mediterranean" },
+      { value: "mollusk-free", label: "Mollusk Free" },
+      { value: "mustard-free", label: "Mustard Free" },
+      { value: "No-oil-added", label: "No oil added" },
+      { value: "paleo", label: "Paleo" },
+      { value: "peanut-free", label: "Peanut Free" },
+      { value: "pecatarian", label: "Pescatarian" },
+      { value: "pork-free", label: "Pork Free" },
+      { value: "red-meat-free", label: "Red Meat Free" },
+      { value: "sesame-free", label: "Sesame Free" },
+      { value: "shellfish-free", label: "Shellfish Free" },
+      { value: "soy-free", label: "Soy Free" },
+      { value: "sugar-conscious", label: "Sugar-Conscious" },
+      { value: "sulfite-free", label: "Sulfite-Free" },
+      { value: "tree-nut-free", label: "Tree-Nut-Free" },
+      { value: "wheat-free", label: "Wheat-Free" },
+      { value: "Alcohol-Cocktail", label: "alcohol-cocktail" },
+    ],
+    mealType: [
+      { value: "breakfast", label: "Breakfast" },
+      { value: "lunch", label: "Lunch" },
+      { value: "snack", label: "Snack" },
+      { value: "teatime", label: "Teatime" },
+    ],
+    diet: [
+      { value: "balanced", label: "Balanced" },
+      { value: "high-fiber", label: "High Fiber" },
+      { value: "high-protein", label: "High Protein" },
+      { value: "low-carb", label: "Low Carb" },
+      { value: "low-fat", label: "	Low Fat" },
+      { value: "low-sodium", label: "Low Sodium" },
+    ],
+    cuisineType: [
+      { value: "american", label: "American" },
+      { value: "asian", label: "Asian" },
+      { value: "british", label: "British" },
+      { value: "caribbean", label: "Caribbean" },
+      { value: "central europe", label: "Central Europe" },
+      { value: "chinese", label: "Chinese" },
+      { value: "eastern europe", label: "Eastern Europe" },
+      { value: "french", label: "French" },
+      { value: "greek", label: "Greek" },
+      { value: "indian", label: "Indian" },
+      { value: "italian", label: "Italian" },
+      { value: "japanese", label: "Japanese" },
+      { value: "korean", label: "Korean" },
+      { value: "kosher", label: "Kosher" },
+      { value: "mediterranean", label: "Mediterranean" },
+      { value: "mexican", label: "Mexican" },
+      { value: "middle eastern", label: "Middle Easternd" },
+      { value: "nordic", label: "Nordic" },
+      { value: "south american", label: "South American" },
+      { value: "south east asian", label: "South East Asian" },
+      { value: "world", label: "World" },
+    ],
+  };
+  const [activeFilter, setActiveFilter] = useState({
+    category: null,
+    value: null,
+  });
   //state to manage search query
   const [query, setQuery] = useState("");
   //state to manage search results
@@ -112,7 +121,7 @@ function HomePage() {
   //state to manage search button text
   const [isSearching, setIsSearching] = useState(false);
   //constant to track if search is completed
-  const [searchCompleted, setSearchCompleted] = useState(false)
+  const [searchCompleted, setSearchCompleted] = useState(false);
   //state to manage savedRecipes
   const [savedRecipes, setSavedRecipes] = useState([]);
   //state to manage liked recipes
@@ -131,7 +140,7 @@ function HomePage() {
         try {
           const response = await fetch(
             `${backendAddress}/recipes/save/${user.id}`,
-            {credentials: 'include'}
+            { credentials: "include" }
           );
           const data = await response.json();
 
@@ -151,7 +160,7 @@ function HomePage() {
         try {
           const response = await fetch(
             `${backendAddress}/recipes/liked/${user.id}`,
-            {credentials: 'include'}
+            { credentials: "include" }
           );
           const data = await response.json();
           if (Array.isArray(data)) {
@@ -193,28 +202,30 @@ function HomePage() {
     if (searchQuery) {
       url += `category=${searchQuery}&`;
     }
-    if(activeFilters.category && activeFilter.value){
-      url += `${activeFilter.category}=${encodeURIComponent(activeFilter.value)}&`
+    if (activeFilters.category && activeFilter.value) {
+      url += `${activeFilter.category}=${encodeURIComponent(
+        activeFilter.value
+      )}&`;
     }
     try {
       const response = await fetch(url, {
-        credentials: 'include',
+        credentials: "include",
       });
-      if (response.status === 429){
+      if (response.status === 429) {
         setRateLimitModalOpen(true);
-        setTimeout(() => setRateLimitModalOpen(false), 120000)
+        setTimeout(() => setRateLimitModalOpen(false), 120000);
       }
       const data = await response.json();
 
       if (!Array.isArray(data)) {
         setRateLimitModalOpen(true);
-        setTimeout(() => setRateLimitModalOpen(false), 120000)
+        setTimeout(() => setRateLimitModalOpen(false), 120000);
       }
       for (let recipe of data) {
         const encodedRecipeId = encodeURIComponent(recipe.uri);
         const ratingsResponse = await fetch(
           `${backendAddress}/recipes/${encodedRecipeId}/ratings`,
-          {credentials: 'include'}
+          { credentials: "include" }
         );
         const ratingsData = await ratingsResponse.json();
         setRecipeRatings((prev) => ({
@@ -227,7 +238,7 @@ function HomePage() {
         if (isAuthenticated) {
           const userRatingResponse = await fetch(
             `${backendAddress}/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`,
-            {credentials: 'include'}
+            { credentials: "include" }
           );
           const userRatingData = await userRatingResponse.json();
 
@@ -252,13 +263,13 @@ function HomePage() {
         setSearchResults(results);
         setIsLoading(false);
         setIsSearching(true);
-        setSearchCompleted(true)
+        setSearchCompleted(true);
       }, 500);
       return () => clearTimeout(delayDebounceFn);
     } else {
       setSearchResults([]);
       setIsSearching(false);
-      setSearchCompleted(false)
+      setSearchCompleted(false);
     }
   }, [query, activeFilter]);
 
@@ -287,19 +298,18 @@ function HomePage() {
   }
 
   const handleSearchReset = () => {
-    setActiveFilter({category: null, value: null})
+    setActiveFilter({ category: null, value: null });
     setQuery("");
     setSearchResults([]);
     setIsSearching(false);
-    setSearchCompleted(true)
+    setSearchCompleted(true);
   };
 
   const handleFilterChange = (category, value) => {
-    if (activeFilter.category === category && activeFilter.value === value){
-      setActiveFilter({category: null, value: null})
-    }
-    else{
-      setActiveFilter({category, value})
+    if (activeFilter.category === category && activeFilter.value === value) {
+      setActiveFilter({ category: null, value: null });
+    } else {
+      setActiveFilter({ category, value });
     }
   };
 
@@ -313,7 +323,7 @@ function HomePage() {
           userId: user.id,
           recipeId: recipe.uri,
         }),
-        credentials: 'include',
+        credentials: "include",
       });
       setLikedRecipes(
         likedRecipes.filter((liked) => liked.recipeId !== recipeId)
@@ -329,7 +339,7 @@ function HomePage() {
           recipeName: recipe.label,
           recipeImage: recipe.image,
         }),
-        credentials: 'include',
+        credentials: "include",
       });
       const likedRecipe = await response.json();
       setLikedRecipes([...likedRecipes, likedRecipe]);
@@ -368,7 +378,7 @@ function HomePage() {
           userId: user.id,
           recipeId: recipe.uri,
         }),
-        credentials: 'include',
+        credentials: "include",
       });
       setSavedRecipes(
         savedRecipes.filter((saved) => saved.recipeId !== recipe.uri)
@@ -383,7 +393,7 @@ function HomePage() {
           recipeName: recipe.label,
           recipeImage: recipe.image,
         }),
-        credentials: 'include',
+        credentials: "include",
       });
       const savedRecipe = await response.json();
       setSavedRecipes([...savedRecipes, savedRecipe]);
@@ -404,7 +414,7 @@ function HomePage() {
           recipeId,
           rating,
         }),
-        credentials: 'include',
+        credentials: "include",
       });
       const data = await response.json();
 
@@ -422,13 +432,13 @@ function HomePage() {
     }
   };
 
-  const handleAddToPlanner = async(day, mealType, recipe) => {
-    try{
+  const handleAddToPlanner = async (day, mealType, recipe) => {
+    try {
       const response = await fetch(`${backendAddress}/meal-planner/add`, {
         method: "POST",
-        headers: {"Content-Type" : "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId : user.id,
+          userId: user.id,
           day,
           mealType,
           recipeId: recipe.uri,
@@ -436,18 +446,18 @@ function HomePage() {
           recipeImage: recipe.image,
           recipeUrl: recipe.url,
         }),
-        credentials: 'include',
+        credentials: "include",
       });
-      if(response.ok){
+      if (response.ok) {
         alert(`Added ${recipe.label} to ${day}`);
-        setIsModalOpen(false)
-      }else{
+        setIsModalOpen(false);
+      } else {
         const data = await response.json();
-        alert(`Failed to add recipe to planner: ${data.error}`)
+        alert(`Failed to add recipe to planner: ${data.error}`);
       }
-    }catch(error){
+    } catch (error) {
       console.error("Error adding recipe to planner: ", error);
-      alert("Failed to add recipe to planner")
+      alert("Failed to add recipe to planner");
     }
   };
 
@@ -461,78 +471,52 @@ function HomePage() {
 
   return (
     <>
-      <Header />
-      <div className="top-section">
-        <div className="top-info">
-          <h1>
-            <span>Culinary Canvas</span>
-          </h1>
-          <p>The best place to leave your taste buds tingling</p>
-          <Link to="/login">
-            <button className="top-section-button">
-              Want to join in on the fun?Click here to join!
-            </button>
-          </Link>
+      <div className="culinary-canvas-top">
+        <div id="culinary-canvas-title">
+          <h1>Culinary Canvas</h1>
+          <img src="./culincary-canvas-logo.png" />
         </div>
-        <div className="top-image">
-          <img src="../top-image-background-chanwalrus.jpg" />
-        </div>
-        <div className="top-recipe-cards">
-          <div className="top-recipe-card">
-            <img
-              src="../top-image-background-macaroons.jpg"
-              alt="recipe-card-background-image"
-            />
-            <h3>Tasty Snacks</h3>
-          </div>
-          <div className="top-recipe-card">
-            <img
-              src="../top-image-background-onions.jpg"
-              alt="recipe-card-background-image"
-            />
-            <h3>Tasty Meals</h3>
-          </div>
-          <div className="top-recipe-card">
-            <img
-              src="../top-image-background-pancakes.jpg"
-              alt="recipe-card-background-image"
-            />
-            <h3>Healthy Life</h3>
-          </div>
+        <div className="culinary-canvas-user-information">
+          {isAuthenticated && user ? (
+            <div className="user-information">
+              <Link to={`/login/${user.id}`}>
+                <img
+                  className="profile-picture"
+                  src={user.imageUrl}
+                  alt={`${user.name}'s profile picture`}
+                />
+              </Link>
+              <p>Hi @{user.name}</p>
+              <button id="LogOutButton" onClick={LogOut}>
+                Log Out
+              </button>
+              <div>
+                <Link to="/notifications">
+                  <img src="./bell.png" id="notifications-bell"/>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="user-authentication">
+              <button className="user-log-in">
+                <Link to="/login">Log In</Link>
+              </button>
+              <button className="user-sign-up">
+                <Link to="/create">Sign Up</Link>
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      {isAuthenticated && user ? (
-        <div className="user-information">
-          <Link to={`/login/${user.id}`}>
-            <img
-              className="profile-picture"
-              src={user.imageUrl}
-              alt={`${user.name}'s profile picture`}
-            />
-          </Link>
-          <p>Hi @{user.name}</p>
-          <button id="LogOutButton" onClick={LogOut}>
-            Log Out
-          </button>
-          <div>
-          <Link to="/notifications">
-            <img src="./bell.png"/>
-          </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="user-authentication">
-          <button className="user-log-in">
-            <Link to="/login">Log In</Link>
-          </button>
-          <button className="user-sign-up">
-            <Link to="/create">Sign Up</Link>
-          </button>
-        </div>
-      )}
-      <RateLimitModal isOpen={isRateLimitModalOpen} onClose={() => setRateLimitModalOpen(false)}/>
+      <RateLimitModal
+        isOpen={isRateLimitModalOpen}
+        onClose={() => setRateLimitModalOpen(false)}
+      />
       {user && showNotificationModal && (
-        <NotificationModal userId = {user.id} onClose={() => setShowNotificationModal(false)}/>
+        <NotificationModal
+          userId={user.id}
+          onClose={() => setShowNotificationModal(false)}
+        />
       )}
       <div className="search-form">
         <input
@@ -555,11 +539,13 @@ function HomePage() {
             <div key={category} className="filter-category">
               <h4>{category.charAt(0).toUpperCase() + category.slice(1)}</h4>
               <select
-                value={activeFilter.category === category ? activeFilter.value: ''}
+                value={
+                  activeFilter.category === category ? activeFilter.value : ""
+                }
                 onChange={(e) => handleFilterChange(category, e.target.value)}
               >
                 <option value="">None</option>
-                {options.map(option => (
+                {options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -598,10 +584,11 @@ function HomePage() {
               </button>
               <p>Likes: {result.likes || 0}</p>
               {result.healthScore && (
-                <p>Health Score : {" "}
-                <span style={{color: result.healthColor}}>
-                  {Math.round(result.healthScore)} %
-                </span>
+                <p>
+                  Health Score :{" "}
+                  <span style={{ color: result.healthColor }}>
+                    {Math.round(result.healthScore)} %
+                  </span>
                 </p>
               )}
               <button
@@ -610,18 +597,17 @@ function HomePage() {
                   handleSave(result);
                 }}
               >
-                {isRecipeSaved(result.uri)
-                  ? "Added to Saved"
-                  : "Add to Saved"}
+                {isRecipeSaved(result.uri) ? "Added to Saved" : "Add to Saved"}
               </button>
-              <button onClick={() => {setSelectedrecipe(result); setIsModalOpen(true); }}>
+              <button
+                onClick={() => {
+                  setSelectedrecipe(result);
+                  setIsModalOpen(true);
+                }}
+              >
                 +
               </button>
-              <a
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={result.url} target="_blank" rel="noopener noreferrer">
                 View Recipe
               </a>
             </div>
@@ -630,10 +616,13 @@ function HomePage() {
       )}
       {!isLoading && searchCompleted && searchResults.length === 0 && (
         <div className="no-results">
-          <p>No results found for your search. Please try different keywords or filter.</p>
+          <p>
+            No results found for your search. Please try different keywords or
+            filter.
+          </p>
         </div>
       )}
-      {!isLoading && searchResults.length === 0 && !searchCompleted &&  (
+      {!isLoading && searchResults.length === 0 && !searchCompleted && (
         <div>
           <RecipeOfTheDay />
           <div className="recipe-sections">
@@ -671,8 +660,7 @@ function HomePage() {
                           rating={userRatings[recipeData.uri] || 0}
                           averageRating={
                             recipeRatings[recipeData.uri]
-                              ? recipeRatings[recipeData.uri]
-                                  .averageRating
+                              ? recipeRatings[recipeData.uri].averageRating
                               : 0
                           }
                           onRate={(rating) =>
@@ -685,14 +673,13 @@ function HomePage() {
                             handleLike(recipeData);
                           }}
                         >
-                          {isRecipeLiked(recipeData.uri)
-                            ? "Unlike"
-                            : "Like"}
+                          {isRecipeLiked(recipeData.uri) ? "Unlike" : "Like"}
                         </button>
                         <p>Likes: {recipeData.likes}</p>
                         {recipeData.healthScore && (
-                          <p>Health Score : {" "}
-                            <span style={{color: recipeData.healthColor}}>
+                          <p>
+                            Health Score :{" "}
+                            <span style={{ color: recipeData.healthColor }}>
                               {Math.round(recipeData.healthScore)} %
                             </span>
                           </p>
@@ -707,8 +694,13 @@ function HomePage() {
                             ? "Added to Saved"
                             : "Add to Saved"}
                         </button>
-                        <button onClick={() => {setSelectedrecipe(recipeData); setIsModalOpen(true)}}>
-                            +
+                        <button
+                          onClick={() => {
+                            setSelectedrecipe(recipeData);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          +
                         </button>
                         <a
                           href={recipeData.url}
@@ -726,7 +718,13 @@ function HomePage() {
           </div>
         </div>
       )}
-      <MealPlannerModal recipe={selectedRecipe} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onAddToPlanner={handleAddToPlanner}/>
+      <MealPlannerModal
+        recipe={selectedRecipe}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddToPlanner={handleAddToPlanner}
+      />
+      <Footer/>
     </>
   );
 }
