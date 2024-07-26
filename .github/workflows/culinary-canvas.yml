@@ -27,7 +27,7 @@ jobs:
     - name: Lint Frontend
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
       run: |
-        npm ci
+        npm install
         npm install eslint --save-dev
         npx eslint . --fix
       
@@ -56,7 +56,7 @@ jobs:
 
     - name: Install frontend dependencies
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
-      run: npm ci
+      run: npm install
 
     - name: Build frontend
       working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
