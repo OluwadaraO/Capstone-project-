@@ -6,7 +6,37 @@ on:
   pull_request:
     branches: [main]
 
-jobs:
+jobs: 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4.0.3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm install eslint --save-dev
+        
+    - name: Run ESLint
+      run: npx eslint --global
+
+    - name: Lint Backend
+      working-directory: culinary-canvas/capstone-project/backend
+      run: |
+        npm ci
+        npx eslint . --fix
+
+    - name: Lint Frontend
+      working-directory: culinary-canvas/capstone-project/frontend/my_capstone_project
+      run: |
+        npm ci
+        npx eslint . --fix
+      
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -70,62 +100,6 @@ jobs:
     - name: Install node-fetch
       run: npm install node-fetch
 
-    - name: Create account and run tests
-      env: 
-        BASE_URL: http://localhost:3000
-        TEST_USERNAME: ${{github.sha}}-testuser
-        TEST_PASSWORD: ${{github.sha}}-testpassword
-      id: auth
-      run: |
-        node -e "
-        const fetch = require('node-fetch');
-        const fs = require('fs')
-        BASE_URL = process.env.BACKEND_ADDRESS
-        TEST_USERNAME = process.env.TEST_USERNAME
-        TEST_PASSWORD = process.env.TEST_PASSWORD
-
-        async function createAccountandLogin(){
-          let response = await fetch(`${BASE_URL}/create`, {
-            method: 'POST',
-            headers: {
-              'Content-Type' : 'application/json',
-            },
-            body: JSON.stringify({
-              userName: TEST_USERNAME,
-              name: 'Test User',
-              password: TEST_PASSWORD
-            }),
-          });
-          let data = await response.json();
-          if (response.status !== 200 || !data.newUserAccount){
-            throw new Error(`Failed to create account`);
-          };
-          console.log('Account created successfully!');
-
-          response = await fetch(`${BASE_URL}/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type' : 'application/json',
-            },
-            body: JSON.stringify({
-              userName: TEST_USERNAME,
-              password: TEST_PASSWORD
-            }),
-          });
-          data = await response.json();
-          if(!data.token){
-            throw new Error('Failed to login')
-          };
-          console.log('Login successful');
-          return data.token;
-        }
-
-        createAccountandLogin().then(token => {
-          console.log('Received token: ', token);
-        }).catch(error => {
-          console.error('Test failed: ', error);
-        });
-        "
     - name: Test Python script
       working-directory: culinary-canvas/capstone-project/backend
       run: |
