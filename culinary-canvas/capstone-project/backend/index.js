@@ -668,7 +668,6 @@ app.get('/recipes', async (req, res) => {
         const preferences = await prisma.userPreferences.findUnique({
             where: { userId: parseInt(userId) }
         })
-
         const dietaryPreferences = preferences.dietaryPreferences;
         const dietTypes = DIET_TYPES.filter(dietType => dietaryPreferences.includes(dietType));
         const allergens = dietaryPreferences.reduce((acc, preference) => {
