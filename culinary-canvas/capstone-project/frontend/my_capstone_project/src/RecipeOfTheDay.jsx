@@ -29,7 +29,7 @@ function RecipeOfTheDay() {
 
   return (
     <div className="recipe-of-the-day">
-      <h2>Recipe of The Day</h2>
+      <h2 className="recipe-of-the-day-title">Recipe of The Day</h2>
       {recipe && (
         <>
           <div className="recipe-content">

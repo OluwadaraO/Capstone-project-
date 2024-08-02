@@ -62,22 +62,40 @@ function ScrapedRecipes() {
     }
   };
 
+  const handleHomePage = () => {
+    navigate('/');
+  };
+
+  const handleUserPage = () => {
+    navigate('/login/:id');
+  };
+
   return (
     <div>
-      <h1>Welcome</h1>
       <h2>Recipes Added By You</h2>
-      <Link to="/">
-        <button>Back to Home Page</button>
-      </Link>
-      <Link to="/login/:id">
-        <button>Back to User's Page</button>
-      </Link>
-      <button
-        onClick={openModal}
-        title="Want to keep other recipes here? Submit the link to that website!"
-      >
-        Import Recipe Url
-      </button>
+      <div className='quick-links'>
+        <img
+          src="../house-solid.svg"
+          alt="home page"
+          onClick={handleHomePage}
+          className="home-page"
+          title="Back to home page"
+        />
+        <img
+          src="../user-solid.svg"
+          alt="user-profile"
+          onClick={handleUserPage}
+          className="user-page"
+          title="Back to my page"
+        />
+        <button
+          onClick={openModal}
+          title="Want to keep other recipes here? Submit the link to that website!"
+          className='import-recipe'
+        >
+          Import Recipe Url
+        </button>
+      </div>
       {scrapedRecipes.length > 0 && user ? (
         <ul>
           {scrapedRecipes.map((recipe) => (
@@ -88,7 +106,7 @@ function ScrapedRecipes() {
                 <ol>{recipe.ingredients}</ol>
                 <p>Calories: {recipe.calories}</p>
                 <a href={recipe.url} target="_blank" rel="noopener noreferrer">
-                  {recipe.url}
+                  View Recipe
                 </a>
                 <button onClick={() => handleDeleteImportedRecipes(recipe.id)}>Delete</button>
               </div>

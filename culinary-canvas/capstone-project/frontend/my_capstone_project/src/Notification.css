@@ -1,0 +1,17 @@
+.home-page,
+.user-page {
+    height: 30px;
+}
+
+.home-page:hover,
+.user-page:hover {
+    cursor: pointer;
+}
+
+.notifications{
+    margin-left: 20px;
+}
+
+.notification-top{
+    margin-top: 20px;
+}

@@ -1,111 +1,97 @@
-import "./HomePage.css";
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "./RedirectToAuthentication";
-import LoadingSpinner from "./LoadingSpinner";
-import { Link } from "react-router-dom";
-import StarRating from "./StarRating";
-import RecipeOfTheDay from "./RecipeOfTheDay";
-import MealPlannerModal from "./MealPlannerModal";
-import RateLimitModal from "./RateLimitModal";
-import NotificationModal from "./NotificationModal";
-import Footer from "./Footer";
+import './HomePage.css';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './RedirectToAuthentication';
+import LoadingSpinner from './LoadingSpinner';
+import { Link } from 'react-router-dom';
+import StarRating from './StarRating';
+import RecipeOfTheDay from './RecipeOfTheDay';
+import MealPlannerModal from './MealPlannerModal';
+import RateLimitModal from './RateLimitModal';
+import NotificationModal from './NotificationModal';
+import Footer from './Footer';
 function HomePage() {
   const navigate = useNavigate();
-  const {
-    isAuthenticated,
-    user,
-    logOut,
-    showNotificationModal,
-    setShowNotificationModal,
-  } = useAuth();
+  const { isAuthenticated, user, logOut, showNotificationModal, setShowNotificationModal } =
+    useAuth();
   //state to store recipies for each query
   const [recipes, setRecipes] = useState({});
   //array of queries to fetch different categories of recipies
-  const queries = [
-    "chicken",
-    "beef",
-    "fish",
-    "rice",
-    "cookies",
-    "cheese",
-    "salad",
-    "pasta",
-  ];
+  const queries = ['chicken', 'beef', 'fish', 'rice', 'cookies', 'cheese', 'salad', 'pasta'];
   //filter options
   const filterCategories = {
     health: [
-      { value: "alcohol-free", label: "No Alcohol" },
-      { value: "vegan", label: "Vegan" },
-      { value: "vegetarian", label: "Vegetarian" },
-      { value: "egg-free", label: "Egg Free" },
-      { value: "celery-free", label: "Celery Free" },
-      { value: "crustacean-free", label: "Crustacean Free" },
-      { value: "DASH", label: "DASH" },
-      { value: "fish-free", label: " Fish Free" },
-      { value: "fodmap-free", label: "Fodmap Free" },
-      { value: "gluten-free", label: "Gluten Free" },
-      { value: "immuno-supportive", label: "Immuno-supportive" },
-      { value: "keto-friendly", label: "Keto Friendly" },
-      { value: "kidney-friendly", label: "Kidney Friendly" },
-      { value: "kosher", label: "Kosher" },
-      { value: "low-potassium", label: "Low Potassium" },
-      { value: "low-sugar", label: "Low Sugar" },
-      { value: "lupine-free", label: "Lupine Free" },
-      { value: "Mediterranean", label: "Mediterranean" },
-      { value: "mollusk-free", label: "Mollusk Free" },
-      { value: "mustard-free", label: "Mustard Free" },
-      { value: "No-oil-added", label: "No oil added" },
-      { value: "paleo", label: "Paleo" },
-      { value: "peanut-free", label: "Peanut Free" },
-      { value: "pecatarian", label: "Pescatarian" },
-      { value: "pork-free", label: "Pork Free" },
-      { value: "red-meat-free", label: "Red Meat Free" },
-      { value: "sesame-free", label: "Sesame Free" },
-      { value: "shellfish-free", label: "Shellfish Free" },
-      { value: "soy-free", label: "Soy Free" },
-      { value: "sugar-conscious", label: "Sugar-Conscious" },
-      { value: "sulfite-free", label: "Sulfite-Free" },
-      { value: "tree-nut-free", label: "Tree-Nut-Free" },
-      { value: "wheat-free", label: "Wheat-Free" },
-      { value: "Alcohol-Cocktail", label: "alcohol-cocktail" },
+      { value: 'alcohol-free', label: 'No Alcohol' },
+      { value: 'vegan', label: 'Vegan' },
+      { value: 'vegetarian', label: 'Vegetarian' },
+      { value: 'egg-free', label: 'Egg Free' },
+      { value: 'celery-free', label: 'Celery Free' },
+      { value: 'crustacean-free', label: 'Crustacean Free' },
+      { value: 'DASH', label: 'DASH' },
+      { value: 'fish-free', label: ' Fish Free' },
+      { value: 'fodmap-free', label: 'Fodmap Free' },
+      { value: 'gluten-free', label: 'Gluten Free' },
+      { value: 'immuno-supportive', label: 'Immuno-supportive' },
+      { value: 'keto-friendly', label: 'Keto Friendly' },
+      { value: 'kidney-friendly', label: 'Kidney Friendly' },
+      { value: 'kosher', label: 'Kosher' },
+      { value: 'low-potassium', label: 'Low Potassium' },
+      { value: 'low-sugar', label: 'Low Sugar' },
+      { value: 'lupine-free', label: 'Lupine Free' },
+      { value: 'Mediterranean', label: 'Mediterranean' },
+      { value: 'mollusk-free', label: 'Mollusk Free' },
+      { value: 'mustard-free', label: 'Mustard Free' },
+      { value: 'No-oil-added', label: 'No oil added' },
+      { value: 'paleo', label: 'Paleo' },
+      { value: 'peanut-free', label: 'Peanut Free' },
+      { value: 'pecatarian', label: 'Pescatarian' },
+      { value: 'pork-free', label: 'Pork Free' },
+      { value: 'red-meat-free', label: 'Red Meat Free' },
+      { value: 'sesame-free', label: 'Sesame Free' },
+      { value: 'shellfish-free', label: 'Shellfish Free' },
+      { value: 'soy-free', label: 'Soy Free' },
+      { value: 'sugar-conscious', label: 'Sugar-Conscious' },
+      { value: 'sulfite-free', label: 'Sulfite-Free' },
+      { value: 'tree-nut-free', label: 'Tree-Nut-Free' },
+      { value: 'wheat-free', label: 'Wheat-Free' },
+      { value: 'Alcohol-Cocktail', label: 'alcohol-cocktail' },
     ],
     mealType: [
-      { value: "breakfast", label: "Breakfast" },
-      { value: "lunch", label: "Lunch" },
-      { value: "snack", label: "Snack" },
-      { value: "teatime", label: "Teatime" },
+      { value: 'breakfast', label: 'Breakfast' },
+      { value: 'lunch', label: 'Lunch' },
+      { value: 'snack', label: 'Snack' },
+      { value: 'teatime', label: 'Teatime' },
     ],
     diet: [
-      { value: "balanced", label: "Balanced" },
-      { value: "high-fiber", label: "High Fiber" },
-      { value: "high-protein", label: "High Protein" },
-      { value: "low-carb", label: "Low Carb" },
-      { value: "low-fat", label: "	Low Fat" },
-      { value: "low-sodium", label: "Low Sodium" },
+      { value: 'balanced', label: 'Balanced' },
+      { value: 'high-fiber', label: 'High Fiber' },
+      { value: 'high-protein', label: 'High Protein' },
+      { value: 'low-carb', label: 'Low Carb' },
+      { value: 'low-fat', label: '	Low Fat' },
+      { value: 'low-sodium', label: 'Low Sodium' },
     ],
     cuisineType: [
-      { value: "american", label: "American" },
-      { value: "asian", label: "Asian" },
-      { value: "british", label: "British" },
-      { value: "caribbean", label: "Caribbean" },
-      { value: "central europe", label: "Central Europe" },
-      { value: "chinese", label: "Chinese" },
-      { value: "eastern europe", label: "Eastern Europe" },
-      { value: "french", label: "French" },
-      { value: "greek", label: "Greek" },
-      { value: "indian", label: "Indian" },
-      { value: "italian", label: "Italian" },
-      { value: "japanese", label: "Japanese" },
-      { value: "korean", label: "Korean" },
-      { value: "kosher", label: "Kosher" },
-      { value: "mediterranean", label: "Mediterranean" },
-      { value: "mexican", label: "Mexican" },
-      { value: "middle eastern", label: "Middle Easternd" },
-      { value: "nordic", label: "Nordic" },
-      { value: "south american", label: "South American" },
-      { value: "south east asian", label: "South East Asian" },
-      { value: "world", label: "World" },
+      { value: 'american', label: 'American' },
+      { value: 'asian', label: 'Asian' },
+      { value: 'british', label: 'British' },
+      { value: 'caribbean', label: 'Caribbean' },
+      { value: 'central europe', label: 'Central Europe' },
+      { value: 'chinese', label: 'Chinese' },
+      { value: 'eastern europe', label: 'Eastern Europe' },
+      { value: 'french', label: 'French' },
+      { value: 'greek', label: 'Greek' },
+      { value: 'indian', label: 'Indian' },
+      { value: 'italian', label: 'Italian' },
+      { value: 'japanese', label: 'Japanese' },
+      { value: 'korean', label: 'Korean' },
+      { value: 'kosher', label: 'Kosher' },
+      { value: 'mediterranean', label: 'Mediterranean' },
+      { value: 'mexican', label: 'Mexican' },
+      { value: 'middle eastern', label: 'Middle Easternd' },
+      { value: 'nordic', label: 'Nordic' },
+      { value: 'south american', label: 'South American' },
+      { value: 'south east asian', label: 'South East Asian' },
+      { value: 'world', label: 'World' },
     ],
   };
   const [activeFilter, setActiveFilter] = useState({
@@ -113,7 +99,7 @@ function HomePage() {
     value: null,
   });
   //state to manage search query
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   //state to manage search results
   const [searchResults, setSearchResults] = useState([]);
   //state to manage loading
@@ -138,10 +124,9 @@ function HomePage() {
     if (isAuthenticated && user) {
       const fetchSavedRecipes = async () => {
         try {
-          const response = await fetch(
-            `${backendAddress}/recipes/save/${user.id}`,
-            { credentials: "include" }
-          );
+          const response = await fetch(`${backendAddress}/recipes/save/${user.id}`, {
+            credentials: 'include',
+          });
           const data = await response.json();
 
           if (Array.isArray(data)) {
@@ -158,10 +143,9 @@ function HomePage() {
 
       const fetchLikedRecipes = async () => {
         try {
-          const response = await fetch(
-            `${backendAddress}/recipes/liked/${user.id}`,
-            { credentials: "include" }
-          );
+          const response = await fetch(`${backendAddress}/recipes/liked/${user.id}`, {
+            credentials: 'include',
+          });
           const data = await response.json();
           if (Array.isArray(data)) {
             setLikedRecipes(data);
@@ -169,7 +153,7 @@ function HomePage() {
             setLikedRecipes([]);
           }
         } catch (error) {
-          console.error("Error fetching liked recipes: ", error);
+          console.error('Error fetching liked recipes: ', error);
           setLikedRecipes([]);
         }
       };
@@ -181,8 +165,8 @@ function HomePage() {
   const LogOut = async () => {
     try {
       await logOut();
-      alert("Logged Out Successfully");
-      navigate("/");
+      alert('Logged Out Successfully');
+      navigate('/');
     } catch (error) {
       console.error(error);
     }
@@ -191,7 +175,7 @@ function HomePage() {
   //if a user that isn't logged in clicks on a button take them to log out page
   function handleHomePageClick() {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate('/login');
     }
   }
 
@@ -203,13 +187,11 @@ function HomePage() {
       url += `category=${searchQuery}&`;
     }
     if (activeFilters.category && activeFilter.value) {
-      url += `${activeFilter.category}=${encodeURIComponent(
-        activeFilter.value
-      )}&`;
+      url += `${activeFilter.category}=${encodeURIComponent(activeFilter.value)}&`;
     }
     try {
       const response = await fetch(url, {
-        credentials: "include",
+        credentials: 'include',
       });
       if (response.status === 429) {
         setRateLimitModalOpen(true);
@@ -225,7 +207,7 @@ function HomePage() {
         const encodedRecipeId = encodeURIComponent(recipe.uri);
         const ratingsResponse = await fetch(
           `${backendAddress}/recipes/${encodedRecipeId}/ratings`,
-          { credentials: "include" }
+          { credentials: 'include' }
         );
         const ratingsData = await ratingsResponse.json();
         setRecipeRatings((prev) => ({
@@ -238,7 +220,7 @@ function HomePage() {
         if (isAuthenticated) {
           const userRatingResponse = await fetch(
             `${backendAddress}/recipes/${encodedRecipeId}/user-rating?userId=${user.id}`,
-            { credentials: "include" }
+            { credentials: 'include' }
           );
           const userRatingData = await userRatingResponse.json();
 
@@ -290,7 +272,7 @@ function HomePage() {
   const handleRecipeCardClick = (e) => {
     const card = e.target.value;
     if (card && card.classList) {
-      card.classList.toggle("active");
+      card.classList.toggle('active');
     }
   };
   if (isLoading) {
@@ -299,7 +281,7 @@ function HomePage() {
 
   const handleSearchReset = () => {
     setActiveFilter({ category: null, value: null });
-    setQuery("");
+    setQuery('');
     setSearchResults([]);
     setIsSearching(false);
     setSearchCompleted(true);
@@ -317,29 +299,27 @@ function HomePage() {
     const recipeId = recipe.uri;
     if (likedRecipes.some((liked) => liked.recipeId === recipeId)) {
       await fetch(`${backendAddress}/recipes/unlike`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           recipeId: recipe.uri,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
-      setLikedRecipes(
-        likedRecipes.filter((liked) => liked.recipeId !== recipeId)
-      );
+      setLikedRecipes(likedRecipes.filter((liked) => liked.recipeId !== recipeId));
       updateRecipeLikes(recipeId, -1);
     } else {
       const response = await fetch(`${backendAddress}/recipes/like`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           recipeId: recipe.uri,
           recipeName: recipe.label,
           recipeImage: recipe.image,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
       const likedRecipe = await response.json();
       setLikedRecipes([...likedRecipes, likedRecipe]);
@@ -372,28 +352,26 @@ function HomePage() {
   const handleSave = async (recipe) => {
     if (savedRecipes.some((saved) => saved.recipeId === recipe.uri)) {
       await fetch(`${backendAddress}/recipes/unsaved`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           recipeId: recipe.uri,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
-      setSavedRecipes(
-        savedRecipes.filter((saved) => saved.recipeId !== recipe.uri)
-      );
+      setSavedRecipes(savedRecipes.filter((saved) => saved.recipeId !== recipe.uri));
     } else {
       const response = await fetch(`${backendAddress}/recipes/saved`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           recipeId: recipe.uri,
           recipeName: recipe.label,
           recipeImage: recipe.image,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
       const savedRecipe = await response.json();
       setSavedRecipes([...savedRecipes, savedRecipe]);
@@ -402,19 +380,19 @@ function HomePage() {
 
   const handleRateRecipe = async (recipeId, rating) => {
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate('/login');
       return;
     }
     try {
       const response = await fetch(`${backendAddress}/recipes/rate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           recipeId,
           rating,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
       const data = await response.json();
 
@@ -428,15 +406,15 @@ function HomePage() {
         [recipeId]: rating,
       }));
     } catch (error) {
-      console.error("Error rating recipes", error);
+      console.error('Error rating recipes', error);
     }
   };
 
   const handleAddToPlanner = async (day, mealType, recipe) => {
     try {
       const response = await fetch(`${backendAddress}/meal-planner/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.id,
           day,
@@ -446,7 +424,7 @@ function HomePage() {
           recipeImage: recipe.image,
           recipeUrl: recipe.url,
         }),
-        credentials: "include",
+        credentials: 'include',
       });
       if (response.ok) {
         alert(`Added ${recipe.label} to ${day}`);
@@ -456,8 +434,8 @@ function HomePage() {
         alert(`Failed to add recipe to planner: ${data.error}`);
       }
     } catch (error) {
-      console.error("Error adding recipe to planner: ", error);
-      alert("Failed to add recipe to planner");
+      console.error('Error adding recipe to planner: ', error);
+      alert('Failed to add recipe to planner');
     }
   };
 
@@ -484,6 +462,7 @@ function HomePage() {
                   className="profile-picture"
                   src={user.imageUrl}
                   alt={`${user.name}'s profile picture`}
+                  title="My Profile"
                 />
               </Link>
               <p>Hi @{user.name}</p>
@@ -492,7 +471,7 @@ function HomePage() {
               </button>
               <div>
                 <Link to="/notifications">
-                  <img src="./bell.png" id="notifications-bell"/>
+                  <img src="./bell.png" id="notifications-bell" />
                 </Link>
               </div>
             </div>
@@ -508,15 +487,9 @@ function HomePage() {
           )}
         </div>
       </div>
-      <RateLimitModal
-        isOpen={isRateLimitModalOpen}
-        onClose={() => setRateLimitModalOpen(false)}
-      />
+      <RateLimitModal isOpen={isRateLimitModalOpen} onClose={() => setRateLimitModalOpen(false)} />
       {user && showNotificationModal && (
-        <NotificationModal
-          userId={user.id}
-          onClose={() => setShowNotificationModal(false)}
-        />
+        <NotificationModal userId={user.id} onClose={() => setShowNotificationModal(false)} />
       )}
       <div className="search-form">
         <input
@@ -526,11 +499,8 @@ function HomePage() {
           onChange={(e) => setQuery(e.target.value)}
           className="search-input"
         />
-        <button
-          onClick={isSearching ? handleSearchReset : () => {}}
-          className="search-button"
-        >
-          {isSearching ? "Back to Recommended Recipes" : "Search"}
+        <button onClick={isSearching ? handleSearchReset : () => {}} className="search-button">
+          {isSearching ? 'Back to Recommended Recipes' : 'Search'}
         </button>
       </div>
       {isSearching && (
@@ -539,9 +509,7 @@ function HomePage() {
             <div key={category} className="filter-category">
               <h4>{category.charAt(0).toUpperCase() + category.slice(1)}</h4>
               <select
-                value={
-                  activeFilter.category === category ? activeFilter.value : ""
-                }
+                value={activeFilter.category === category ? activeFilter.value : ''}
                 onChange={(e) => handleFilterChange(category, e.target.value)}
               >
                 <option value="">None</option>
@@ -564,42 +532,43 @@ function HomePage() {
               <img src={result.image} alt={result.label} />
               <h3>{result.label}</h3>
               <p>Calories: {Math.round(result.calories)}</p>
-              <p>{result.totalTime}</p>
+              <p>Total Times: {result.totalTime} minutes</p>
               <StarRating
                 rating={userRatings[result.uri] || 0}
                 averageRating={
-                  recipeRatings[result.uri]
-                    ? recipeRatings[result.uri].averageRating
-                    : 0
+                  recipeRatings[result.uri] ? recipeRatings[result.uri].averageRating : 0
                 }
                 onRate={(rating) => handleRateRecipe(result.uri, rating)}
               />
               <button
+                className="likes"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleLike(result);
                 }}
               >
-                {isRecipeLiked(result.uri) ? "Unlike" : "Like"}
+                {isRecipeLiked(result.uri) ? 'Unlike' : 'Like'}
               </button>
               <p>Likes: {result.likes || 0}</p>
               {result.healthScore && (
                 <p>
-                  Health Score :{" "}
+                  Health Score :{' '}
                   <span style={{ color: result.healthColor }}>
                     {Math.round(result.healthScore)} %
                   </span>
                 </p>
               )}
               <button
+                className="saved"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSave(result);
                 }}
               >
-                {isRecipeSaved(result.uri) ? "Added to Saved" : "Add to Saved"}
+                {isRecipeSaved(result.uri) ? 'Added to Saved' : 'Add to Saved'}
               </button>
               <button
+                className="add-to-planner"
                 onClick={() => {
                   setSelectedrecipe(result);
                   setIsModalOpen(true);
@@ -616,10 +585,7 @@ function HomePage() {
       )}
       {!isLoading && searchCompleted && searchResults.length === 0 && (
         <div className="no-results">
-          <p>
-            No results found for your search. Please try different keywords or
-            filter.
-          </p>
+          <p>No results found for your search. Please try different keywords or filter.</p>
         </div>
       )}
       {!isLoading && searchResults.length === 0 && !searchCompleted && (
@@ -629,32 +595,23 @@ function HomePage() {
             {/* loop through each query to create a section for each category */}
             {queries.map((query) => (
               <div key={query} className="recipe-section">
-                <h2>
-                  Recommended {query.charAt(0).toUpperCase() + query.slice(1)}{" "}
-                  Recipes
-                </h2>
+                <h2>Recommended {query.charAt(0).toUpperCase() + query.slice(1)} Recipes</h2>
                 <div className="recipe-scroll">
                   {Array.isArray(recipes[query]) &&
                     recipes[query].length > 0 &&
                     recipes[query].map((recipeData, index) => (
-                      <div
-                        key={index}
-                        className="recipe-card"
-                        onClick={handleRecipeCardClick}
-                      >
+                      <div key={index} className="recipe-card" onClick={handleRecipeCardClick}>
                         <img
                           src={recipeData.image}
                           alt={recipeData.label}
                           onClick={handleHomePageClick}
                         />
-                        <h3 onClick={handleHomePageClick}>
-                          {recipeData.label}{" "}
-                        </h3>
+                        <h3 onClick={handleHomePageClick}>{recipeData.label} </h3>
                         <p onClick={handleHomePageClick}>
                           Calories: {Math.round(recipeData.calories)}
                         </p>
                         <p onClick={handleHomePageClick}>
-                          Total Time : {recipeData.totalTime}
+                          Total Time : {recipeData.totalTime} minutes
                         </p>
                         <StarRating
                           rating={userRatings[recipeData.uri] || 0}
@@ -663,38 +620,37 @@ function HomePage() {
                               ? recipeRatings[recipeData.uri].averageRating
                               : 0
                           }
-                          onRate={(rating) =>
-                            handleRateRecipe(recipeData.uri, rating)
-                          }
+                          onRate={(rating) => handleRateRecipe(recipeData.uri, rating)}
                         />
                         <button
+                          className="likes"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleLike(recipeData);
                           }}
                         >
-                          {isRecipeLiked(recipeData.uri) ? "Unlike" : "Like"}
+                          {isRecipeLiked(recipeData.uri) ? 'Unlike' : 'Like'}
                         </button>
                         <p>Likes: {recipeData.likes}</p>
                         {recipeData.healthScore && (
                           <p>
-                            Health Score :{" "}
+                            Health Score :{' '}
                             <span style={{ color: recipeData.healthColor }}>
                               {Math.round(recipeData.healthScore)} %
                             </span>
                           </p>
                         )}
                         <button
+                          className="saved"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSave(recipeData);
                           }}
                         >
-                          {isRecipeSaved(recipeData.uri)
-                            ? "Added to Saved"
-                            : "Add to Saved"}
+                          {isRecipeSaved(recipeData.uri) ? 'Added to Saved' : 'Add to Saved'}
                         </button>
                         <button
+                          className="add-to-planner"
                           onClick={() => {
                             setSelectedrecipe(recipeData);
                             setIsModalOpen(true);
@@ -724,7 +680,7 @@ function HomePage() {
         onClose={() => setIsModalOpen(false)}
         onAddToPlanner={handleAddToPlanner}
       />
-      <Footer/>
+      <Footer />
     </>
   );
 }

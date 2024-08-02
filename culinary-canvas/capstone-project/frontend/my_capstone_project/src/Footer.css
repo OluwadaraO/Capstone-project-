@@ -9,29 +9,9 @@
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
 }
 
-.footer-section{
-    flex: 1;
-    margin: 0 20px;
-}
-
-.footer-section h3{
-    color: #333;
-    font-size: 18px;
-    margin-bottom: 15px;
-}
-
-.footer-section button{
-    color: #666;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.footer-section button:hover{
-    color: #000;
-}
 .footer-bottom{
     text-align: center;
     padding-top: 20px;
@@ -57,6 +37,9 @@
     transition: opacity 1s ease-in-out;
     background-size: cover;
     background-position: center;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .moving-image.active{
