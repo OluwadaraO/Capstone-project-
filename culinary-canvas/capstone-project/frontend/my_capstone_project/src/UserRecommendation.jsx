@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './RedirectToAuthentication';
 import LoadingSpinner from './LoadingSpinner';
-import './UserRecommendation.css'
+import './UserRecommendation.css';
 
 function UserRecommendation() {
   const navigate = useNavigate();
@@ -114,62 +114,73 @@ function UserRecommendation() {
   };
 
   return (
-    <div className='profile-setup'>
-      <form onSubmit={handleSubmit}>
-        <h2>Profile SetUp</h2>
-        <div className="cooking-level">
-          <label>Cooking Level: </label>
-          <select value={cookingLevel} onChange={(e) => setCookingLevel(e.target.value)} required>
-            <option value="">Select your cooking level</option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced learner">Advanced Learner</option>
-            <option value="Professional">Professional</option>
-          </select>
-        </div>
-        <div className="dietary-preferences">
-          <label>Dietary Preferences (Optional): </label>
-          <div className="dietary-preference">
-            {dietaryLabels.map((label) => (
-              <label key={label}>
-                <input
-                  type="checkbox"
-                  value={label}
-                  checked={dietaryPreferences.includes(label)}
-                  onChange={handleCheckboxChange}
-                />
-                {label}
-              </label>
-            ))}
+    <div className='user-recommendation-page'>
+      <div className="profile-setup">
+        <form onSubmit={handleSubmit}>
+          <h2 className='profile-name'>Profile SetUp</h2>
+          <div className="cooking-level">
+            <label>Cooking Level: </label>
+            <select value={cookingLevel} onChange={(e) => setCookingLevel(e.target.value)} required>
+              <option value="">Select your cooking level</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced learner">Advanced Learner</option>
+              <option value="Professional">Professional</option>
+            </select>
           </div>
-        </div>
-        <div className="favorite-foods">
-          <label>Favorite Foods (Optional): </label>
-          {favoriteFoods.map((food, index) => (
-            <div key={index} className='favorite-food-item'>
-              <input
-                type="text"
-                placeholder="Enter a favorite food"
-                value={food}
-                onChange={(e) => handleFavoriteFoodChange(index, e)}
-              />
-              <button type="button" onClick={() => handleRemoveFavoriteFood(index)}>
-                Remove
-              </button>
+          <div className="dietary-preferences">
+            <label>Dietary Preferences (Optional): </label>
+            <div className="dietary-preference">
+              {dietaryLabels.map((label) => (
+                <label key={label}>
+                  <input
+                    type="checkbox"
+                    value={label}
+                    checked={dietaryPreferences.includes(label)}
+                    onChange={handleCheckboxChange}
+                    className='dietary-label'
+                  />
+                  {label}
+                </label>
+              ))}
             </div>
-          ))}
-          {favoriteFoods.length <= 10 && (
-            <button type="button" onClick={handleAddFavoriteFood}>
-              Add Favorite Food
-            </button>
-          )}
-        </div>
+          </div>
+          <div className="favorite-foods">
+            <label>Favorite Foods (Optional): </label>
+            {favoriteFoods.map((food, index) => (
+              <div key={index} className="favorite-food-item">
+                <input
+                  type="text"
+                  placeholder="Enter a favorite food"
+                  value={food}
+                  onChange={(e) => handleFavoriteFoodChange(index, e)}
+                  className='favorite-food'
+                />
+                <img
+                  src="./trash-solid.svg"
+                  alt="delete-favorite-food"
+                  onClick={() => handleRemoveFavoriteFood(index)}
+                  className="delete-can"
+                />
+              </div>
+            ))}
+            {favoriteFoods.length <= 10 && (
+              <img
+                src="./plus-solid.svg"
+                alt="add-favorite-food"
+                className="add-favorite-icon"
+                onClick={handleAddFavoriteFood}
+                title="Add Favorite Food"
+              />
+            )}
+          </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : 'Save Preferences'}
-        </button>
-        {loading && <LoadingSpinner />}
-      </form>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Saving...' : 'Save Preferences'}
+          </button>
+          {loading && <LoadingSpinner />}
+        </form>
+      </div>
     </div>
   );
 }

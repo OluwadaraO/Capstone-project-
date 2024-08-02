@@ -17,31 +17,11 @@ function Footer() {
     return () => clearInterval(interval)
   }, []);
 
-  function handleHomePageClick() {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }
   return (
       <footer className="footer">
         <div className="footer-content">
           <h3>Culinary Canvas</h3>
           <p>Explore the art of cooking with us.</p>
-        </div>
-        <div className="footer-section">
-          <h3>Quick Links</h3>
-          <Link to="/">
-            <button onClick={handleHomePageClick}>Home</button>
-          </Link>
-          <Link to='/login'>
-            <button>Log In</button>
-          </Link>
-          <Link to='/create'>
-            <button>Sign Up</button>
-          </Link>
-        </div>
-        <div className="footer-section">
-          <h3>Connect With Us</h3>
         </div>
         <div className='moving-images'>
            {images.map((image, index) => (

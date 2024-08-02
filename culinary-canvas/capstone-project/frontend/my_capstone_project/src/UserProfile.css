@@ -11,8 +11,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    border-radius: 10px;
+}
+
+.quick-links {
+    display: flex;
+    flex-direction: row;
 }
 
 .profile-picture {
@@ -23,38 +26,59 @@
     margin-right: 20px;
     margin-bottom: 10px;
 }
-.welcome-user{
+
+.welcome-user {
     text-align: center;
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 15px;
 }
-.buttons{
-   display: flex;
-   flex-wrap: wrap;
-   justify-content: center;
-   gap: 10px;
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
-.buttons button, .buttons a{
+.buttons,
+.buttons a {
     padding: 8px 15px;
     border: none;
     border-radius: 5px;
-    background-color: #ff4500;
+    background-color: #a52a2a;
     color: white;
     cursor: pointer;
     text-decoration: none;
     font-size: 16px;
 }
 
-.buttons button:hover, .buttons a:hover{
+.buttons a{
+    text-decoration: none;
+}
+.home-page {
+    height: 30px;
+}
+
+.home-page:hover {
+    cursor: pointer;
+}
+
+.notification {
+    width: 30px;
+}
+
+.buttons:hover,
+.buttons a:hover {
     background-color: #e63900;
 }
-.main-content{
+
+.main-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
+
 .saved-recipes {
     grid-column: 3;
     grid-row: 1/3;
@@ -83,10 +107,11 @@
     grid-row: 2;
     background-color: #f9f9f9;
     padding: 20px;
+    gap: 20px;
     border-radius: 10px;
 }
 
-.chart-container{
+.chart-container {
     grid-column: 1/3;
     grid-row: 3;
     background-color: #f9f9f9;
@@ -94,44 +119,140 @@
     border-radius: 10px;
 }
 
-@media(max-width: 768px){
-    .dashboard-container{
+@media(max-width: 768px) {
+    .dashboard-container {
         grid-template-columns: 1fr;
     }
-    .profile-section, .saved-recipes , .chart-container, .recommended-recipes, .dietary-restrictions{
+
+    .profile-section,
+    .saved-recipes,
+    .chart-container,
+    .recommended-recipes,
+    .dietary-restrictions,
+    .grocery-list {
         grid-column: 1/-1;
     }
-    .profile-section{
+
+    .profile-section {
         flex-direction: column;
         text-align: center;
     }
-    .profile-picture{
+
+    .profile-picture {
         margin-right: 0;
         margin-bottom: 20px;
     }
-    .buttons{
+
+    .buttons {
         flex-direction: column;
         width: 100%;
     }
-    .saved-recipes{
+
+    .saved-recipes {
         grid-row: auto;
     }
 }
-.meal-planner-dashboard{
+
+.meal-planner-dashboard {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 30px;
 }
 
-.meal-card{
-    width: calc(33.33% - 10px);
+.meal-card {
+    width: 200px;
     background-color: #f9f9f9;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.meal-card img{
+
+.meal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+.recipe-image-weekly {
     width: 100%;
     height: 150px;
     object-fit: cover;
+}
+
+h2{
+    font-size: 2em;
+    color: #a52a2a;
+    margin-bottom: 20px;
+    text-align: center;
+
+}
+
+.view-recipe{
+    padding: 4px 8px;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    background-color: #a52a2a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-recipe:hover{
+    background-color: #f40612;
+}
+
+.recipe-name{
+    text-align: center;
+}
+
+.delete-can-weekly {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    width: 18px;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.delete-can-weekly:hover {
+    opacity: 1;
+}
+
+.quick-links{
+    gap: 20px;
+}
+
+.grocery-list-items{
+    padding: 4px;
+}
+
+.add-items, .delete-grocery-item {
+    padding: 2px 4px;
+    background-color: #a52a2a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 20px;
+    width: 40px
+}
+.grocery-list-item{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.grocery-list-input{
+    height: 20px;
+}
+
+.delete-grocery-item {
+    width: 50px;
+}
+
+.add-items:hover, .delete-grocery-item:hover{
+    background-color: #f40612;
 }

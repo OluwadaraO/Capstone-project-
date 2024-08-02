@@ -18,7 +18,7 @@
     max-width: 60%;
 }
 
-h2{
+.recipe-of-the-day-title{
     font-size: 2em;
     color: #a52a2a;
     margin-bottom: 10px;
@@ -44,6 +44,9 @@ h3{
 .nutrition p{
     font-size: 1em;
     color: #333;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .nutrition span{

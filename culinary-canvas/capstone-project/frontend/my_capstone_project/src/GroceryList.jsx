@@ -83,13 +83,14 @@ function GroceryList() {
 
   return (
     <div className="grocery-list">
-      <div>
+      <div className="grocery-list-item">
         <input
           type="text"
           placeholder="Item Name"
           value={newItem.itemName}
           onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
           required
+          className="grocery-list-input"
         />
         <input
           type="number"
@@ -98,18 +99,20 @@ function GroceryList() {
             setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })
           }
           required
+          className="grocery-list-input"
         />
-        <button onClick={handleAddItem}>Add Item</button>
+        <button onClick={handleAddItem} className="add-items">Add</button>
       </div>
       <ul>
         {groceryItems.length === 0 ? (
           <p>No items in your grocery list</p>
         ) : (
           groceryItems.map((item) => (
-            <li key={item.id}>
+            <li key={item.id} className="grocery-list-items">
               <input
                 type="text"
                 value={item.itemName}
+                className="grocery-list-text"
                 onChange={(e) =>
                   handleUpdateItem(item.id, {
                     ...item,
@@ -124,7 +127,7 @@ function GroceryList() {
                 onChange={(e) => QuantityChange(e, item.id)}
                 required
               />
-              <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
+              <button onClick={() => handleDeleteItem(item.id)} className="delete-grocery-item">Delete</button>
             </li>
           ))
         )}

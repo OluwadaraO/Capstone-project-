@@ -97,6 +97,10 @@ function UserProfile() {
     setIsModalOpen(false);
   };
 
+  const handleHomePage = () => {
+    navigate('/');
+  };
+
   const handleUpload = async (file) => {
     const formData = new FormData();
     formData.append('profilePicture', file);
@@ -121,39 +125,46 @@ function UserProfile() {
   return (
     <div className="dashboard-container">
       <div className="profile-section">
-        <img
-          src={user.imageUrl}
-          alt={`${user.name}'s profile`}
-          className="profile-picture"
-          onClick={openProfilePictureModal}
-        />
-        <h1 className="welcome-user">Welcome back {user.name}</h1>
-        <button onClick={handleFindRecipe} className="buttons">
-          Find Recipes with Ingredients
-        </button>
-        <Link to="/">
-          <button className="buttons">Back to Home Page</button>
-        </Link>
-        <button onClick={handleLogOut} className="buttons">
-          Log Out
-        </button>
-        <button
-          onClick={openModal}
-          title="Want to keep other recipes here? Submit the link to that website!"
-          className="buttons"
-        >
-          Import Recipe Url
-        </button>
-        <Link to="/imported-recipes">
-          <button className="buttons">View All Your Imported Recipes</button>
-        </Link>
-        <Link to="/notifications">
-          <img src="../bell.png" alt="Notifications bell" />
-        </Link>
-        <RateLimitModal
-          isOpen={isRateLimitModalOpen}
-          onClose={() => setRateLimitModalOpen(false)}
-        />
+        <div className="profile-image">
+          <img
+            src={user.imageUrl}
+            alt={`${user.name}'s profile`}
+            className="profile-picture"
+            onClick={openProfilePictureModal}
+          />
+          <h1 className="welcome-user">Welcome back {user.name}</h1>
+        </div>
+        <div className="quick-links">
+          <button onClick={handleFindRecipe} className="buttons">
+            Find Recipes with Ingredients
+          </button>
+          <button onClick={handleLogOut} className="buttons">
+            Log Out
+          </button>
+          <button
+            onClick={openModal}
+            title="Want to keep other recipes here? Submit the link to that website!"
+            className="buttons"
+          >
+            Import Recipe Url
+          </button>
+          <Link to="/imported-recipes">
+            <button className="buttons">View all my Imported Recipes</button>
+          </Link>
+          <Link to="/notifications">
+            <img src="../bell.png" alt="Notifications bell" className="notification" />
+          </Link>
+          <img
+            src="../house-solid.svg"
+            alt="home page"
+            onClick={handleHomePage}
+            className="home-page"
+          />
+          <RateLimitModal
+            isOpen={isRateLimitModalOpen}
+            onClose={() => setRateLimitModalOpen(false)}
+          />
+        </div>
       </div>
       <div className="main-content">
         <div className="saved-recipes">
